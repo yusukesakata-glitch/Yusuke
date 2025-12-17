@@ -475,7 +475,7 @@
     let watchId = null;
     let isTrackingLocked = false;
     let quickChips = ["不在", "移転", "商談中", "完了"];
-     
+      
     let db = [];
     let map, geocoder, AdvancedMarkerElement;
     let markers = [];
@@ -594,7 +594,7 @@
     function forceDelete(key) { if(confirm(`Delete "${key}"?`)) { localStorage.removeItem(key); openSettings(); if(key === DB_NAME) { db = []; resetAndRender(); updateMapPins([]); } alert("Deleted."); } }
 
     async function saveKeyAndInit() { const k=document.getElementById('apiKey').value; if(!k)return alert("Enter Key"); localStorage.setItem('map_apiKey', k); await initSystem(k); alert("Saved."); }
-     
+      
     async function initSystem(key) {
         if(window.google && window.google.maps && map) return;
         if(!window.google || !window.google.maps) {
@@ -884,8 +884,11 @@
     
     function loadMore() { currentLimit += parseInt(document.getElementById('limitSelect').value) || 100; render(); }
     
+    // ★修正版：編集モーダルを開く
     function openEdit(id) { 
-        const d = db.find(x => x.id === id); if(!d) return; 
+        const d = db.find(x => x.id === id); 
+        if(!d) return; 
+
         document.getElementById('edit-id').value = d.id; 
         document.getElementById('edit-note').value = d.note||""; 
         document.getElementById('edit-rep').value = d.rep_name||""; 
@@ -895,6 +898,9 @@
         document.getElementById('edit-tel').value = d.tel||""; 
         document.getElementById('edit-addr').value = d.address; 
         
+        // ★重要：住所変更検知のために元の住所を隠しフィールドに保存
+        document.getElementById('orig-addr').value = d.address; 
+
         const chipArea = document.getElementById('edit-chip-area');
         chipArea.innerHTML = "";
         quickChips.forEach(t => {
@@ -906,16 +912,54 @@
         chipArea.appendChild(clr);
         document.getElementById('editModal').style.display='flex'; 
     }
+
     function closeModal() { document.getElementById('editModal').style.display='none'; }
+
+    // ★修正版：編集保存（住所変更時のピン移動対応）
     async function saveEdit() { 
-        const id = document.getElementById('edit-id').value; const idx = db.findIndex(x => x.id === id); 
+        const id = document.getElementById('edit-id').value; 
+        const idx = db.findIndex(x => x.id === id); 
         if(idx === -1) return;
+
+        const newAddr = document.getElementById('edit-addr').value.trim();
+        const oldAddr = document.getElementById('orig-addr').value;
+
+        // 全フィールド更新
         db[idx].note = document.getElementById('edit-note').value;
         db[idx].rep_name = document.getElementById('edit-rep').value;
+        db[idx].r_code = document.getElementById('edit-r').value;
         db[idx].name = document.getElementById('edit-name').value;
         db[idx].building = document.getElementById('edit-building').value;
-        saveDB(); render(); closeModal(); 
+        db[idx].tel = document.getElementById('edit-tel').value;
+        db[idx].address = newAddr;
+
+        // 住所変更時は座標も再取得
+        if(newAddr !== oldAddr && newAddr !== "" && geocoder) {
+            try {
+                const coords = await new Promise((resolve, reject) => {
+                    geocoder.geocode({ address: newAddr }, (results, status) => {
+                        if (status === 'OK') {
+                            resolve({
+                                lat: results[0].geometry.location.lat(),
+                                lng: results[0].geometry.location.lng()
+                            });
+                        } else {
+                            reject(status);
+                        }
+                    });
+                });
+                db[idx].lat = coords.lat;
+                db[idx].lng = coords.lng;
+            } catch(e) {
+                alert("住所変更に伴うマップ座標の更新に失敗しました。\n住所テキストのみ更新します。");
+            }
+        }
+
+        saveDB(); 
+        render(); 
+        closeModal(); 
     }
+
     function deleteCustomer() { if(confirm("Delete this customer?")) { db = db.filter(x => x.id !== document.getElementById('edit-id').value); saveDB(); render(); closeModal(); } }
     function shareOrDownload() { const blob = new Blob([JSON.stringify(db)], {type: 'application/json'}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `map_data.json`; a.click(); }
     function uploadData(i) { const f=i.files[0]; if(!f)return; const r=new FileReader(); r.onload=e=>{try{if(confirm("Load JSON?")){db=JSON.parse(e.target.result);saveDB();populateFilters();resetAndRender();alert("Loaded");}}catch(z){alert("Failed");}}; r.readAsText(f); }
