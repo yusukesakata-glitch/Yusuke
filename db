@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>顧客マップDB Pro - Sanctuary Ed.</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Shippori+Mincho:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- デザイン定義（Sanctuaryテーマベース） --- */
+        :root {
+            /* カラーパレット */
+            --bg: #f9f8f6;          /* 背景：生成り色 */
+            --card: #ffffff;        /* カード：白 */
+            --text-main: #2c2c2c;   /* 文字：墨色 */
+            --text-sub: #6e6e6e;    /* サブ文字：グレー */
+            --gold: #bfa37e;        /* アクセント：ゴールド */
+            --gold-light: #e6dccf;  /* 薄いゴールド */
+            --dark: #1a1a1a;        /* 締め色：黒に近いグレー */
+            
+            /* 機能色（マップピン等のロジック用色はJS依存のため維持しつつ、馴染むように調整） */
+            --primary: #bfa37e;     
+            --accent-blue: #5d7ea3; /* 青ピンの代わり（落ち着いた藍色） */
+            --accent-red: #bf5b5b;  /* 赤ピンの代わり（落ち着いた赤） */
+
+            /* デザイン要素 */
+            --shadow: 0 10px 30px rgba(0,0,0,0.03);
+            --radius: 4px; /* 角丸を小さくしてシックに */
+            --font-serif: 'Shippori Mincho', serif;
+            --font-eng: 'Cinzel', serif;
+        }
+
+        body {
+            font-family: var(--font-serif);
+            background-color: var(--bg);
+            color: var(--text-main);
+            margin: 0; padding: 0;
+            height: 100vh; overflow-y: auto;
+            -webkit-tap-highlight-color: transparent;
+            letter-spacing: 0.05em;
+        }
+
+        /* レイアウト構造 */
+        .app-container { display: flex; flex-direction: column; height: 100%; max-width: 1600px; margin: 0 auto; padding: 20px; box-sizing: border-box; gap: 20px; }
+        
+        @media (min-width: 900px) {
+            body { overflow: hidden; }
+            .app-container { flex-direction: row; padding: 30px; }
+            .left-section { flex: 2; display: flex; flex-direction: column; gap: 15px; height: 100%; }
+            .right-section { flex: 1; display: flex; flex-direction: column; height: 100%; min-width: 420px; overflow-y: auto; padding-right: 5px; }
+            .map-wrapper { flex: 1; border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); position: relative; border: 1px solid rgba(0,0,0,0.05); }
+        }
+        @media (max-width: 899px) {
+            .app-container { display: block; padding: 15px; }
+            .map-wrapper { height: 50vh; min-height: 350px; border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); position: relative; margin-bottom: 20px; border: 1px solid rgba(0,0,0,0.05); }
+            .right-section { padding-bottom: 100px; }
+        }
+
+        /* ヘッダー */
+        .header-area { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #e0e0e0; padding-bottom: 10px; }
+        h1 { 
+            font-family: var(--font-eng); 
+            font-size: 1.5rem; font-weight: 600; margin: 0; letter-spacing: 0.1em; 
+            color: var(--text-main);
+        }
+        
+        /* 設定ボタン */
+        .btn-settings {
+            background: transparent; border: 1px solid var(--gold);
+            padding: 8px 16px; border-radius: var(--radius);
+            font-family: var(--font-serif); font-size: 0.8rem; cursor: pointer;
+            color: var(--text-main); display: flex; align-items: center; gap: 6px;
+            transition: 0.3s;
+        }
+        .btn-settings:hover { background: var(--gold); color: #fff; }
+
+        /* 検索・フィルタエリア */
+        .search-row { display: flex; gap: 10px; margin-bottom: 10px; }
+        .place-search-box { flex: 1; display: flex; align-items: center; background: var(--card); border-radius: var(--radius); padding: 4px 10px; box-shadow: var(--shadow); border: 1px solid rgba(0,0,0,0.05); }
+        .place-search-input { flex: 1; border: none; padding: 12px; font-size: 0.95rem; background: transparent; outline: none; font-family: var(--font-serif); }
+        .place-search-btn { background: none; border: none; font-size: 1rem; padding: 0 10px; color: var(--gold); cursor: pointer; }
+
+        .filter-area { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        select { 
+            width: 100%; padding: 12px; border-radius: var(--radius); 
+            border: 1px solid #ddd; background: var(--card); 
+            color: var(--text-main); font-family: var(--font-serif); font-size: 0.85rem; 
+            box-shadow: none; appearance: none; -webkit-appearance: none; text-align: center; cursor: pointer;
+        }
+        select:focus { border-color: var(--gold); outline: none; }
+
+        .list-search-box { position: relative; margin-bottom: 20px; }
+        .list-search-box input { 
+            width: 100%; padding: 14px 14px 14px 45px; border-radius: var(--radius); 
+            border: 1px solid #ddd; background: var(--card); font-size: 0.95rem; 
+            box-sizing: border-box; box-shadow: var(--shadow); font-family: var(--font-serif);
+            transition: 0.3s;
+        }
+        .list-search-box input:focus { border-color: var(--gold); }
+        .list-search-icon { position: absolute; left: 15px; top: 14px; color: var(--gold); font-size: 1.1rem; }
+
+        /* マップ関連 */
+        #map-area { background: #E5E5EA; width: 100%; height: 100%; }
+        #google-map-view { width: 100%; height: 100%; }
+        
+        .btn-current-loc { 
+            position: absolute; bottom: 100px; right: 15px; z-index: 10; 
+            width: 40px; height: 40px; background: var(--card); border-radius: 50%; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: none; 
+            font-size: 1.2rem; color: var(--text-main); cursor: pointer; 
+            display: flex; align-items: center; justify-content: center; 
+            transition: 0.3s;
+        }
+        .btn-current-loc.locked { background: var(--gold); color: white; }
+        .btn-current-loc.unlocked { color: var(--gold); border: 1px solid var(--gold); }
+        
+        .map-sync-wrapper { 
+            position: absolute; top: 15px; right: 15px; z-index: 10; 
+            background: rgba(255, 255, 255, 0.95); padding: 8px 16px; 
+            border-radius: var(--radius); box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
+            display: flex; align-items: center; gap: 10px; 
+            font-family: var(--font-serif); font-size: 0.8rem; color: var(--text-main); 
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        /* トグルスイッチ（エレガントver） */
+        .toggle-switch { position: relative; display: inline-block; width: 40px; height: 22px; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ddd; transition: .4s; border-radius: 22px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+        input:checked + .slider { background-color: var(--gold); }
+        input:checked + .slider:before { transform: translateX(18px); }
+
+        /* 統計エリア */
+        #stats-area { 
+            background: var(--card); padding: 20px; border-radius: var(--radius); 
+            margin-bottom: 20px; box-shadow: var(--shadow); 
+        }
+        .stats-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #f0f0f0; padding-bottom: 10px;}
+        .stats-total { font-family: var(--font-eng); font-weight: 600; font-size: 1.1rem; color: var(--text-main); }
+        
+        .limit-select { 
+            padding: 6px 12px; border-radius: var(--radius); border: 1px solid #ddd; 
+            font-size: 0.75rem; background: #fff; color: var(--text-sub); font-family: var(--font-serif);
+        }
+
+        .stats-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+        .stats-item { 
+            font-size: 0.75rem; padding: 6px 14px; background: #f4f4f4; 
+            border-radius: 2px; cursor: pointer; border: 1px solid transparent; 
+            transition: all 0.3s; color: var(--text-sub);
+        }
+        .stats-item.selected { 
+            background: var(--gold); color: #fff; border-color: var(--gold);
+            box-shadow: 0 2px 8px rgba(191, 163, 126, 0.4);
+        }
+        .stats-count { font-weight: 600; margin-left: 5px; font-family: var(--font-eng); }
+
+        /* リストカード */
+        .customer-item { 
+            background: var(--card); padding: 25px; border-radius: var(--radius); 
+            margin-bottom: 15px; display: flex; justify-content: space-between; align-items: flex-start; 
+            box-shadow: var(--shadow); border: 1px solid rgba(0,0,0,0.02);
+            transition: transform 0.2s;
+        }
+        .customer-item:hover { transform: translateY(-2px); }
+        
+        .info-main { 
+            font-family: var(--font-serif); font-weight: 600; font-size: 1.1rem; 
+            margin-bottom: 8px; color: var(--text-main); line-height: 1.4;
+        }
+        .info-sub { font-size: 0.85rem; color: var(--text-sub); margin-bottom: 5px; display: flex; align-items: center; gap: 10px; }
+        
+        .tag { 
+            background: var(--gold-light); padding: 3px 8px; border-radius: 2px; 
+            font-size: 0.7rem; color: #5a4b35; letter-spacing: 0.05em;
+        }
+        
+        .action-area { display: flex; flex-direction: column; gap: 10px; margin-left: 15px; }
+        .icon-btn { 
+            width: 44px; height: 44px; border-radius: 50%; background: #fcfcfc; border: 1px solid #eee;
+            display: flex; align-items: center; justify-content: center; 
+            text-decoration: none; font-size: 1.1rem; transition: all 0.3s; color: var(--text-main);
+        }
+        .icon-btn:hover { background: var(--gold); color: #fff; border-color: var(--gold); }
+        /* アイコンの色味を落ち着かせる */
+        .icon-btn.call { color: var(--text-main); } 
+        .icon-btn.map { color: var(--text-main); }
+
+        .btn-copy { 
+            font-size: 0.7rem; background: transparent; border: 1px solid #ddd; 
+            padding: 2px 8px; border-radius: 2px; cursor: pointer; color: #999;
+            transition: 0.3s;
+        }
+        .btn-copy:hover { border-color: var(--gold); color: var(--gold); }
+
+        /* 登録フォーム（トグル） */
+        .toggle-card { 
+            background: var(--card); border-radius: var(--radius); margin-top: 30px; 
+            box-shadow: var(--shadow); overflow: hidden; border: 1px solid rgba(0,0,0,0.02);
+        }
+        .toggle-header { 
+            padding: 20px; font-weight: 500; font-size: 1rem; cursor: pointer; 
+            display: flex; justify-content: space-between; background: #fff; color: var(--text-main);
+            font-family: var(--font-serif); letter-spacing: 0.1em;
+        }
+        .toggle-content { padding: 25px; display: none; border-top: 1px solid #f5f5f5; background: #fafafa; }
+        
+        label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--gold); margin-bottom: 8px; margin-top: 20px; font-family: var(--font-eng); letter-spacing: 0.1em; }
+        input[type="text"], textarea { 
+            width: 100%; padding: 12px; border: 1px solid #ddd; background: #fff; 
+            border-radius: var(--radius); box-sizing: border-box; font-size: 16px; font-family: var(--font-serif);
+        }
+        input[type="text"]:focus, textarea:focus { border-color: var(--gold); outline: none; }
+
+        /* ボタン群 */
+        .btn-main { 
+            width: 100%; padding: 16px; background: var(--dark); color: #fff; 
+            border: none; border-radius: var(--radius); font-weight: 500; cursor: pointer; 
+            margin-top: 25px; font-family: var(--font-eng); letter-spacing: 0.1em;
+            transition: 0.3s;
+        }
+        .btn-main:hover { background: var(--gold); }
+
+        .data-tools { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+        .btn-sub { 
+            padding: 12px; background: #fff; border: 1px solid #ddd; 
+            border-radius: var(--radius); font-weight: 500; cursor: pointer; 
+            font-size: 0.85rem; color: var(--text-main); font-family: var(--font-serif);
+            transition: 0.3s;
+        }
+        .btn-sub:hover { border-color: var(--gold); color: var(--gold); }
+
+        .btn-del { 
+            width: 100%; margin-top: 30px; padding: 12px; background: transparent; 
+            color: #999; border: 1px solid #eee; border-radius: var(--radius); 
+            font-weight: 500; cursor: pointer; font-size: 0.8rem; transition: 0.3s;
+        }
+        .btn-del:hover { color: #d32f2f; border-color: #d32f2f; background: #fff5f5; }
+
+        .btn-load-more { 
+            width: 100%; padding: 15px; background: transparent; 
+            border: 1px solid var(--gold); color: var(--gold); 
+            border-radius: 30px; font-weight: 600; margin-top: 20px; cursor: pointer; 
+            font-family: var(--font-eng); letter-spacing: 0.1em; transition: 0.3s;
+        }
+        .btn-load-more:hover { background: var(--gold); color: white; }
+
+        /* チップ（クイック入力） */
+        .quick-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .chip { 
+            font-size: 0.75rem; background: #fff; padding: 6px 14px; border-radius: 20px; 
+            cursor: pointer; border: 1px solid #ddd; color: var(--text-sub);
+            transition: 0.3s;
+        }
+        .chip:hover { border-color: var(--gold); color: var(--gold); }
+        .chip:active { background: var(--gold); color: white; }
+        .chip-del { color: #ccc; font-weight: bold; margin-left: 8px; cursor: pointer; }
+        .chip-del:hover { color: #d32f2f; }
+
+        /* モーダル */
+        .modal-overlay { 
+            position: fixed; top:0; left:0; width:100%; height:100%; 
+            background: rgba(44, 44, 44, 0.7); backdrop-filter: blur(5px); 
+            display:none; justify-content:center; align-items:center; z-index:9999; 
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .modal-content { 
+            background: #fff; padding: 40px; border-radius: 2px; width: 90%; max-width: 450px; 
+            max-height: 85vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.2); 
+            position: relative;
+        }
+        .modal-content h3 {
+            font-family: var(--font-eng); text-align: center; margin-top: 0; 
+            font-weight: 600; letter-spacing: 0.2em; color: var(--text-main); margin-bottom: 30px;
+        }
+
+        .settings-section { 
+            border-bottom: 1px solid #f0f0f0; padding-bottom: 20px; margin-bottom: 20px; 
+        }
+        .settings-section:last-child { border-bottom: none; margin-bottom: 0; }
+
+        .rep-checklist { max-height: 150px; overflow-y: auto; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;}
+        .rep-checklist label { margin: 0; color: var(--text-main); font-weight: 500; font-family: var(--font-serif); }
+
+        #map-placeholder-msg { 
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+            background: rgba(255,255,255,0.9); padding: 30px; border-radius: var(--radius); 
+            font-weight: 500; color: var(--text-main); pointer-events: none; 
+            text-align: center; width: 80%; box-shadow: var(--shadow); 
+            font-family: var(--font-serif); border: 1px solid #eee;
+        }
+
+        /* Info Window (Google Map吹き出し) */
+        .info-window-container { font-family: var(--font-serif); padding: 0 5px 5px 0; max-width: 260px; max-height: 250px; overflow-y: auto; }
+        .info-window-card { margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .info-window-card:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+        .info-title { font-weight: 600; font-size: 1.1rem; margin-bottom: 4px; line-height: 1.3; color: var(--text-main); }
+        .info-meta { font-size: 0.75rem; color: #777; margin-bottom: 6px; background: #f9f9f9; padding: 2px 6px; border-radius: 2px; display: inline-block;}
+        .info-tel { font-weight: 500; color: var(--gold); font-size: 0.9rem; text-decoration: none; margin-bottom: 4px; display: block; font-family: var(--font-eng);}
+        .info-addr { font-size: 0.75rem; color: #666; margin-bottom: 6px; line-height: 1.4;}
+        .info-actions { display: flex; gap: 8px; margin-top: 10px; }
+        .info-btn { 
+            flex: 1; padding: 8px; border-radius: 2px; text-align: center; 
+            font-size: 0.75rem; font-weight: 500; text-decoration: none; cursor: pointer; border: none; 
+            transition: 0.3s;
+        }
+        .btn-edit { background: #f0f0f0; color: #333; }
+        .btn-edit:hover { background: #e0e0e0; }
+        
+        /* スクロールバーのカスタマイズ（Webkit） */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--gold); }
+
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div class="left-section">
+        <div class="search-row">
+            <div class="place-search-box">
+                <input type="text" id="mapJumpInput" class="place-search-input" placeholder="Area Search (e.g. Ginza)" onkeydown="if(event.key==='Enter')searchMapLocation()">
+                <button class="place-search-btn" onclick="searchMapLocation()">🔍</button>
+            </div>
+        </div>
+
+        <div class="map-wrapper">
+            <div id="google-map-view"></div>
+            <div id="map-placeholder-msg">Initializing Map...</div>
+            <div class="map-sync-wrapper">
+                <span>SYNC MAP</span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="mapSyncToggle" onchange="toggleMapSync()">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <button class="btn-current-loc" id="gpsBtn" onclick="toggleGPS()">◎</button>
+        </div>
+    </div>
+
+    <div class="right-section">
+        <div class="header-area">
+            <h1>CLIENT DB PRO</h1>
+            <button class="btn-settings" onclick="openSettings()">⚙️ SETTINGS</button>
+        </div>
+
+        <div class="filter-area">
+            <select id="prefFilter" onchange="resetAndRender()"><option value="ALL">PREFECTURE: ALL</option></select>
+            <select id="stationFilter" onchange="resetAndRender()"><option value="ALL">STATION: ALL</option></select>
+        </div>
+        
+        <div class="list-search-box">
+            <span class="list-search-icon">🔍</span>
+            <input type="text" id="searchInput" placeholder="Search by Name, ID..." oninput="resetAndRender()">
+        </div>
+
+        <div id="stats-area">
+            <div class="stats-header">
+                <div class="stats-total" id="stats-total-text">-- Results</div>
+                <select id="limitSelect" class="limit-select" onchange="changeLimit()">
+                    <option value="100">Show: 100</option>
+                    <option value="300">Show: 300</option>
+                    <option value="500">Show: 500</option>
+                    <option value="ALL">Show: ALL</option>
+                </select>
+            </div>
+            <div id="display-count-text" style="font-size:0.75rem; color:var(--text-sub); margin-bottom:10px; font-family:var(--font-serif);"></div>
+            <div class="stats-grid" id="stats-detail"></div>
+        </div>
+
+        <div id="result-area"></div>
+        <button id="load-more-btn" class="btn-load-more" onclick="loadMore()" style="display:none;">VIEW MORE</button>
+
+        <div class="toggle-card">
+            <div class="toggle-header" onclick="toggleInput()">
+                <span>＋ DATA REGISTRATION</span> <span>▼</span>
+            </div>
+            <div class="toggle-content" id="input-area">
+                <label>REP NAME</label>
+                <input type="text" id="repName" placeholder="e.g. Sato">
+                <label>DATA PASTE (5 Columns: ID|Company|Shop|Addr|Tel)</label>
+                <textarea id="csvInput" placeholder="R001	(Inc)ABC	Omiya	Saitama...	090-1234-5678" style="height:100px;"></textarea>
+                <button class="btn-main" id="runBtn" onclick="processData()">START ANALYSIS</button>
+                <div class="data-tools">
+                    <button class="btn-sub" onclick="shareOrDownload()">💾 SAVE JSON</button>
+                    <button class="btn-sub" onclick="document.getElementById('fileInput').click()">📂 LOAD JSON</button>
+                    <input type="file" id="fileInput" accept=".json,application/json" style="display:none" onchange="uploadData(this)">
+                </div>
+                <button class="btn-del" onclick="clearAll()">DELETE ALL DATA</button>
+                <div id="log-area" style="margin-top:10px; font-size:0.7rem; color:#999; text-align:center;"></div>
+            </div>
+        </div>
+        <div style="height:80px;"></div>
+    </div>
+</div>
+
+<div id="settingsModal" class="modal-overlay">
+    <div class="modal-content">
+        <h3>SETTINGS</h3>
+        <div class="settings-section">
+            <label>API KEY</label>
+            <div style="display:flex; gap:10px;">
+                <input type="password" id="apiKey" placeholder="AIzaSy..." style="flex:1;">
+                <button onclick="saveKeyAndInit()" style="background:var(--dark); color:#fff; border:none; border-radius:2px; padding:0 15px; cursor:pointer;">SAVE</button>
+            </div>
+        </div>
+        <div class="settings-section">
+            <label>MY PINS (BLUE)</label>
+            <div id="rep-checklist" class="rep-checklist"></div>
+        </div>
+        <div class="settings-section">
+            <label>QUICK CHIPS</label>
+            <div style="display:flex; gap:10px; margin-bottom:10px;">
+                <input type="text" id="newChipInput" placeholder="New Chip">
+                <button onclick="addChip()" style="background:var(--gold); color:#fff; border:none; border-radius:2px; padding:0 15px; white-space:nowrap;">ADD</button>
+            </div>
+            <div id="settings-chip-list" class="quick-chips"></div>
+        </div>
+        <div class="settings-section">
+            <label>STORAGE</label>
+            <div style="font-size:0.8rem; margin-bottom:8px;">Current DB: <span id="current-db-name" style="font-weight:600;"></span></div>
+            <div id="storage-list" style="max-height:100px; overflow-y:auto; border:1px solid #eee; padding:5px;"></div>
+        </div>
+        <button class="btn-sub" style="width:100%; background:#f5f5f5; border:none;" onclick="document.getElementById('settingsModal').style.display='none'">CLOSE</button>
+    </div>
+</div>
+
+<div id="editModal" class="modal-overlay">
+    <div class="modal-content">
+        <h3>EDIT INFO</h3>
+        <input type="hidden" id="edit-id"><input type="hidden" id="orig-addr">
+        <label>NOTE</label><textarea id="edit-note" style="height:80px;"></textarea>
+        <div id="edit-chip-area" class="quick-chips" style="margin-bottom:15px;"></div>
+        <label>REP</label><input type="text" id="edit-rep">
+        <label>ID</label><input type="text" id="edit-r">
+        <label>NAME</label><input type="text" id="edit-name">
+        <label>TEL</label><input type="text" id="edit-tel">
+        <label>ADDRESS</label><input type="text" id="edit-addr">
+        <div style="display:flex; gap:15px; margin-top:30px;">
+            <button class="btn-sub" style="flex:1;" onclick="closeModal()">CANCEL</button>
+            <button class="btn-main" style="flex:1; margin-top:0;" onclick="saveEdit()">SAVE</button>
+        </div>
+        <button class="btn-del" style="margin-top:20px; border:none;" onclick="deleteCustomer()">DELETE THIS DATA</button>
+    </div>
+</div>
+
+<script>
+    /* =======================================================
+      機能ロジックは一切変更していません (Design Override Only)
+      =======================================================
+    */
+    const DB_NAME = "map_db"; 
+    let currentLimit = 100;
+    let activeReps = new Set();
+    let mapSyncMode = false;
+    let targetReps = []; 
+    let isPinClick = false; 
+    let myLocationMarker = null; 
+    let watchId = null;
+    let isTrackingLocked = false;
+    let quickChips = ["不在", "移転", "商談中", "完了"];
+     
+    let db = [];
+    let map, geocoder, AdvancedMarkerElement;
+    let markers = [];
+    let infoWindow; 
+
+    // ★ APIキーエラー検知
+    window.gm_authFailure = function() {
+        alert("APIキーエラーです。\n設定を確認してください。");
+        document.getElementById('map-placeholder-msg').innerHTML = "⚠️ API Key Error";
+        localStorage.removeItem('map_apiKey');
+    };
+
+    function toggleInput() { const el=document.getElementById('input-area'); el.style.display=el.style.display==='block'?'none':'block'; }
+    function normalize(s) { return (s||"").replace(/[Ａ-Ｚａ-ｚ０-９]/g, c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0)).toLowerCase().replace(/\s+/g,""); }
+    function log(msg) { document.getElementById('log-area').innerText = msg; }
+
+    window.onload = () => {
+        const k = localStorage.getItem('map_apiKey');
+        const d = localStorage.getItem(DB_NAME);
+        const tr = localStorage.getItem('map_target_reps_json');
+        const qc = localStorage.getItem('map_quick_chips_json');
+        
+        if(tr) { try { targetReps = JSON.parse(tr); } catch(e) { targetReps=[]; } }
+        if(qc) { try { quickChips = JSON.parse(qc); } catch(e) {} }
+        
+        if(d) { try { db = JSON.parse(d); populateFilters(); resetAndRender(); } catch(e){ db=[]; } }
+        
+        if(k) {
+            document.getElementById('apiKey').value = k;
+            document.getElementById('map-placeholder-msg').innerText = "🔑 Initializing...";
+            setTimeout(() => initSystem(k), 500); // 描画安定待ち
+        } else {
+            document.getElementById('map-placeholder-msg').innerHTML = "Please set API Key<br>in Settings";
+        }
+        document.getElementById('current-db-name').innerText = DB_NAME;
+    };
+
+    function openSettings() {
+        const modal = document.getElementById('settingsModal');
+        const repList = document.getElementById('rep-checklist');
+        repList.innerHTML = "";
+        const allReps = [...new Set(db.map(d => d.rep_name || "No Rep"))].sort();
+        allReps.forEach(name => {
+            const div = document.createElement('div'); div.style.padding = "4px 0";
+            const isChecked = targetReps.includes(name) ? "checked" : "";
+            div.innerHTML = `<label style="display:flex;align-items:center;cursor:pointer;margin:0;"><input type="checkbox" value="${name}" ${isChecked} onchange="toggleTargetRep(this)" style="width:auto;margin-right:8px;"> ${name}</label>`;
+            repList.appendChild(div);
+        });
+        renderChipsSettings();
+        
+        const storageList = document.getElementById('storage-list'); storageList.innerHTML = "";
+        for(let i=0; i<localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if(key.startsWith('map_db')) {
+                const div = document.createElement('div'); 
+                div.style.display="flex"; div.style.justifyContent="space-between"; div.style.padding="8px"; div.style.borderBottom="1px solid #eee";
+                div.innerHTML = `<div style="font-weight:500;font-size:0.85rem;">${key}</div><button onclick="forceDelete('${key}')" style="background:#fff;border:1px solid #ddd;border-radius:2px;font-size:0.7rem;padding:2px 8px;cursor:pointer;">DEL</button>`;
+                storageList.appendChild(div);
+            }
+        }
+        modal.style.display = 'flex';
+    }
+
+    function renderChipsSettings() {
+        const list = document.getElementById('settings-chip-list');
+        list.innerHTML = "";
+        quickChips.forEach((c, idx) => {
+            const span = document.createElement('span'); span.className = 'chip';
+            span.innerHTML = `${c} <span class="chip-del" onclick="deleteChip(${idx})">×</span>`;
+            span.onclick = (e) => { if(e.target.className !== 'chip-del') e.stopPropagation(); }; 
+            list.appendChild(span);
+        });
+    }
+    function addChip() {
+        const input = document.getElementById('newChipInput');
+        const val = input.value.trim();
+        if(val) {
+            quickChips.push(val);
+            localStorage.setItem('map_quick_chips_json', JSON.stringify(quickChips));
+            input.value = "";
+            renderChipsSettings();
+        }
+    }
+    function deleteChip(idx) {
+        if(confirm("Delete this chip?")) {
+            quickChips.splice(idx, 1);
+            localStorage.setItem('map_quick_chips_json', JSON.stringify(quickChips));
+            renderChipsSettings();
+        }
+    }
+
+    function toggleTargetRep(checkbox) {
+        const name = checkbox.value;
+        if(checkbox.checked) { if(!targetReps.includes(name)) targetReps.push(name); } 
+        else { targetReps = targetReps.filter(n => n !== name); }
+        localStorage.setItem('map_target_reps_json', JSON.stringify(targetReps));
+        render(); 
+    }
+
+    function forceDelete(key) { if(confirm(`Delete "${key}"?`)) { localStorage.removeItem(key); openSettings(); if(key === DB_NAME) { db = []; resetAndRender(); updateMapPins([]); } alert("Deleted."); } }
+
+    async function saveKeyAndInit() { const k=document.getElementById('apiKey').value; if(!k)return alert("Enter Key"); localStorage.setItem('map_apiKey', k); await initSystem(k); alert("Saved."); }
+     
+    // ★ 修正版 initSystem
+    async function initSystem(key) {
+        if(window.google && window.google.maps && map) return;
+        if(!window.google || !window.google.maps) {
+            await new Promise((resolve, reject) => {
+                if(document.querySelector('script[src*="maps.googleapis.com"]')) {
+                    setTimeout(resolve, 1000); return;
+                }
+                const s = document.createElement('script');
+                s.src = `https://maps.googleapis.com/maps/api/js?key=${key}&loading=async&libraries=places,geocoding,geometry,marker`;
+                s.async = true;
+                s.onload = resolve;
+                s.onerror = (e) => {
+                    document.getElementById('map-placeholder-msg').innerText = "Script Load Error";
+                    reject(e);
+                };
+                document.head.appendChild(s);
+            });
+        }
+
+        try {
+            const { Map } = await google.maps.importLibrary("maps"); 
+            const { Geocoder } = await google.maps.importLibrary("geocoding");
+            const { AdvancedMarkerElement: AM } = await google.maps.importLibrary("marker");
+            geocoder = new Geocoder(); AdvancedMarkerElement = AM;
+            
+            const div = document.getElementById('google-map-view');
+            map = new Map(div, { center:{lat:35.68, lng:139.76}, zoom:13, mapId: "DEMO_MAP_ID", mapTypeControl: false, streetViewControl: false }); 
+            infoWindow = new google.maps.InfoWindow(); 
+            
+            map.addListener('idle', () => { if(!isPinClick && mapSyncMode) resetAndRender(); isPinClick=false; });
+            map.addListener('dragstart', () => { if(watchId) { isTrackingLocked=false; updateGpsBtnState(); } });
+            
+            document.getElementById('map-placeholder-msg').style.display='none';
+            if(db.length > 0) render(); 
+        } catch(e) { 
+            document.getElementById('map-placeholder-msg').innerText = "Init Failed (Reload)";
+        }
+    }
+
+    function updateGpsBtnState() {
+        const btn = document.getElementById('gpsBtn');
+        btn.className = 'btn-current-loc'; 
+        if (!watchId) {} else if (isTrackingLocked) { btn.classList.add('locked'); } else { btn.classList.add('unlocked'); }
+    }
+
+    function toggleGPS() {
+        if (!navigator.geolocation) return alert("Geolocation not supported");
+        if (!map) return alert("Set API Key first");
+
+        if (watchId) {
+            if (isTrackingLocked) { navigator.geolocation.clearWatch(watchId); watchId = null; isTrackingLocked = false; if(myLocationMarker) { myLocationMarker.setMap(null); myLocationMarker = null; } } 
+            else { isTrackingLocked = true; if(myLocationMarker) map.panTo(myLocationMarker.position); }
+        } else {
+            isTrackingLocked = true;
+            watchId = navigator.geolocation.watchPosition((pos) => {
+                const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+                if (myLocationMarker) { myLocationMarker.position = loc; } 
+                else {
+                    const pin = document.createElement("div"); pin.style.width="18px"; pin.style.height="18px"; pin.style.backgroundColor="#4285F4"; pin.style.border="3px solid white"; pin.style.borderRadius="50%";
+                    myLocationMarker = new AdvancedMarkerElement({ map: map, position: loc, content: pin, title: "Me", zIndex: 999 });
+                }
+                if (isTrackingLocked) map.panTo(loc);
+                if (mapSyncMode) resetAndRender();
+            }, (err) => { alert("GPS Failed"); }, { enableHighAccuracy: true });
+        }
+        updateGpsBtnState();
+    }
+
+    function searchMapLocation() {
+        const input = document.getElementById('mapJumpInput').value;
+        if(!input || !geocoder) return;
+        geocoder.geocode({ address: input }, (results, status) => {
+            if (status === 'OK') { map.setCenter(results[0].geometry.location); map.setZoom(14); if(mapSyncMode) resetAndRender(); }
+        });
+    }
+
+    function copyToClipboard(text) { navigator.clipboard.writeText(text).then(() => { alert("Copied: " + text); }); }
+    function addNote(text) { const area = document.getElementById('edit-note'); area.value = (area.value ? area.value + " " : "") + text; }
+
+    async function processData() {
+        const key = document.getElementById('apiKey').value.trim(); const csv = document.getElementById('csvInput').value.trim(); 
+        const newRepName = document.getElementById('repName').value.trim();
+        if(!csv) return alert('Paste list data first');
+        const btn = document.getElementById('runBtn'); btn.disabled = true; btn.innerText = "Processing..."; 
+        try {
+            await initSystem(localStorage.getItem('map_apiKey'));
+            const lines = csv.split('\n'); let count = 0;
+            for(let line of lines) {
+                const cols = line.trim().split(/\t/).map(s=>s.trim());
+                if(cols.length < 4) continue;
+                let r=cols[0], name=(cols[1]+" "+cols[2]).trim(), addr=cols[3], tel=cols[4]||"";
+                try {
+                    const coords = await new Promise((res, rej) => geocoder.geocode({ address: addr }, (r, s) => s==='OK'?res({lat: r[0].geometry.location.lat(), lng: r[0].geometry.location.lng()}):rej(s)));
+                    db.push({ id: Math.random().toString(36).substr(2, 9), r_code: r, name: name, address: addr, tel: tel, lat: coords.lat, lng: coords.lng, rep_name: newRepName, note: "" });
+                    count++; log(`Processing... ${count}`);
+                } catch(e) {}
+                await new Promise(r => setTimeout(r, 400));
+            }
+            saveDB(); populateFilters(); resetAndRender(); 
+            alert(`${count} Completed`);
+        } finally { btn.disabled = false; btn.innerText = "START ANALYSIS"; }
+    }
+
+    function updateMapPins(displayTargets) {
+        if(!map || !AdvancedMarkerElement) return;
+        markers.forEach(m => m.setMap(null)); markers = [];
+        const bounds = new google.maps.LatLngBounds(); let hasPin = false;
+        
+        const searchInput = normalize(document.getElementById('searchInput').value);
+        const hasSearch = searchInput.length > 0;
+        
+        let pinsToShow = displayTargets;
+        if (mapSyncMode && map) {
+            const fPref = document.getElementById('prefFilter').value;
+            const fSt = document.getElementById('stationFilter').value;
+            const mapBaseData = db.filter(d => {
+                if(fPref !== "ALL" && getPrefecture(d.address) !== fPref) return false;
+                if(fSt !== "ALL" && (d.station||"未特定") !== fSt) return false;
+                return true;
+            });
+            const center = map.getCenter();
+            mapBaseData.forEach(d => d._dist = google.maps.geometry.spherical.computeDistanceBetween(center, new google.maps.LatLng(d.lat, d.lng)));
+            mapBaseData.sort((a, b) => a._dist - b._dist);
+            const val = document.getElementById('limitSelect').value;
+            const limit = (val === 'ALL') ? mapBaseData.length : parseInt(val);
+            pinsToShow = mapBaseData.slice(0, limit);
+        }
+
+        const grouped = {};
+        pinsToShow.forEach(c => {
+            if(c.lat && c.lng) {
+                const key = `${c.lat.toFixed(6)},${c.lng.toFixed(6)}`;
+                if(!grouped[key]) grouped[key] = []; grouped[key].push(c);
+            }
+        });
+
+        Object.keys(grouped).forEach(key => {
+            const group = grouped[key];
+            const first = group[0];
+            let isMe = group.some(c => targetReps.includes(c.rep_name));
+            let isHit = group.some(c => hasSearch && normalize(c.name + c.r_code).includes(searchInput));
+            
+            const pinView = document.createElement("div");
+            pinView.style.width = isHit ? "22px" : "16px";
+            pinView.style.height = pinView.style.width;
+            pinView.style.backgroundColor = isHit ? "#FFD60A" : (isMe ? "#5d7ea3" : "#bf5b5b"); /* Blue -> Muted Blue, Red -> Muted Red */
+            pinView.style.borderRadius = "50%"; pinView.style.border = "2px solid white"; pinView.style.boxShadow = "0 2px 5px rgba(0,0,0,0.2)";
+            if(hasSearch && !isHit) pinView.style.opacity = "0.6";
+
+            const m = new AdvancedMarkerElement({ position: {lat:first.lat, lng:first.lng}, map: map, content: pinView, zIndex: isHit ? 1000 : (isMe ? 100 : 1) });
+            
+            m.addListener("click", () => {
+                isPinClick = true;
+                let html = '<div class="info-window-container">';
+                group.forEach(c => {
+                    const telBtn = c.tel ? `<a href="tel:${c.tel}" class="info-tel">📞 ${c.tel}</a>` : "";
+                    const note = c.note ? `<div style="background:#fcf8e3;padding:4px;font-size:0.75rem;margin-bottom:4px;border-radius:2px;color:#8a6d3b;">${c.note}</div>` : "";
+                    html += `<div class="info-window-card"><div class="info-title">${c.name}</div><div class="info-meta">${c.rep_name} / ${c.r_code}</div>${telBtn}<div class="info-addr">${c.address}</div>${note}<button class="info-btn btn-edit" onclick="openEdit('${c.id}')">EDIT</button></div>`;
+                });
+                html += '</div>';
+                infoWindow.setContent(html); infoWindow.open(map, m);
+            });
+            markers.push(m); bounds.extend(m.position); hasPin = true;
+        });
+        if(hasPin && !mapSyncMode && !watchId) map.fitBounds(bounds);
+    }
+
+    function getPrefecture(a) { const m=a.match(/(...??[都道府県])/); return m?m[1]:"Others"; }
+    function populateFilters() {
+        const pSel=document.getElementById('prefFilter'), sSel=document.getElementById('stationFilter');
+        pSel.innerHTML='<option value="ALL">PREFECTURE: ALL</option>';
+        [...new Set(db.map(x=>getPrefecture(x.address)))].sort().forEach(p=>{const o=document.createElement('option');o.value=p;o.innerText=p;pSel.appendChild(o)});
+    }
+
+    function toggleMapSync() { mapSyncMode = document.getElementById('mapSyncToggle').checked; if(mapSyncMode) resetAndRender(); }
+    function resetAndRender() { render(); }
+    function changeLimit() { currentLimit = document.getElementById('limitSelect').value === 'ALL' ? db.length : parseInt(document.getElementById('limitSelect').value); render(); }
+    function toggleRep(name) { if(activeReps.has(name)) activeReps.delete(name); else activeReps.add(name); render(); }
+
+    function render() {
+        const area = document.getElementById('result-area'); area.innerHTML = "";
+        const fPref = document.getElementById('prefFilter').value;
+        const q = normalize(document.getElementById('searchInput').value);
+
+        let filtered = db.filter(d => {
+            if(fPref !== "ALL" && getPrefecture(d.address) !== fPref) return false;
+            if(!q) return true;
+            return normalize(d.name + d.r_code + d.rep_name + d.address).includes(q);
+        });
+
+        if(mapSyncMode && map) {
+            const center = map.getCenter();
+            filtered.forEach(d => d._dist = google.maps.geometry.spherical.computeDistanceBetween(center, new google.maps.LatLng(d.lat, d.lng)));
+            filtered.sort((a, b) => a._dist - b._dist);
+        }
+
+        const counts = {}; filtered.forEach(d => counts[d.rep_name] = (counts[d.rep_name] || 0) + 1);
+        const detailBox = document.getElementById('stats-detail'); detailBox.innerHTML = "";
+        Object.keys(counts).sort().forEach(name => {
+            const div = document.createElement('div'); div.className = `stats-item ${activeReps.has(name)?'selected':''}`;
+            div.innerHTML = `${name} <span class="stats-count">${counts[name]}</span>`;
+            div.onclick = () => toggleRep(name); detailBox.appendChild(div);
+        });
+
+        let targets = activeReps.size ? filtered.filter(d => activeReps.has(d.rep_name)) : filtered;
+        document.getElementById('stats-total-text').innerText = mapSyncMode ? `Near Center` : `Total: ${targets.length}`;
+        document.getElementById('display-count-text').innerText = `Displaying: ${Math.min(targets.length, currentLimit)}`;
+        
+        const displayTargets = targets.slice(0, currentLimit);
+        updateMapPins(displayTargets);
+
+        displayTargets.forEach(c => {
+            const isMe = targetReps.includes(c.rep_name);
+            const color = isMe ? "#5d7ea3" : "#bf5b5b"; // Muted Blue / Muted Red for list dots
+            const div = document.createElement('div');
+            div.className = 'customer-item';
+            div.innerHTML = `<div style="flex:1;"><div class="info-main"><span style="background:${color};width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:10px;vertical-align:middle;"></span>${c.name}</div><div class="info-sub"><span class="tag">${c.r_code||"-"}</span>${c.rep_name||""}</div><div class="info-sub">📞 ${c.tel||""} <button class="btn-copy" onclick="copyToClipboard('${c.tel}')">COPY</button></div><div class="info-sub">${c.address}</div><div style="font-size:0.75rem;color:#bfa37e;margin-top:6px;font-style:italic;">${c.note?'📝 '+c.note:''}</div></div><div class="action-area"><a href="tel:${c.tel}" class="icon-btn call">📞</a><button onclick="panToMap(${c.lat},${c.lng})" class="icon-btn map">📍</button></div>`;
+            area.appendChild(div);
+        });
+        const btnArea = document.getElementById('load-more-btn');
+        btnArea.style.display = (targets.length > currentLimit && document.getElementById('limitSelect').value !== 'ALL') ? 'block' : 'none';
+    }
+
+    function panToMap(lat, lng) { map.setZoom(17); map.panTo({lat, lng}); if(window.innerWidth < 900) document.querySelector('.left-section').scrollIntoView({behavior:'smooth', block:'start'}); }
+    function loadMore() { currentLimit += parseInt(document.getElementById('limitSelect').value) || 100; render(); }
+    
+    function openEdit(id) { 
+        const d = db.find(x => x.id === id); if(!d) return; 
+        document.getElementById('edit-id').value = d.id; 
+        document.getElementById('edit-note').value = d.note||""; 
+        document.getElementById('edit-rep').value = d.rep_name||""; 
+        document.getElementById('edit-r').value = d.r_code||""; 
+        document.getElementById('edit-name').value = d.name; 
+        document.getElementById('edit-tel').value = d.tel||""; 
+        document.getElementById('edit-addr').value = d.address; 
+        
+        const chipArea = document.getElementById('edit-chip-area');
+        chipArea.innerHTML = "";
+        quickChips.forEach(t => {
+            const sp = document.createElement('span'); sp.className='chip'; sp.innerText=t;
+            sp.onclick = () => addNote(t); chipArea.appendChild(sp);
+        });
+        const clr = document.createElement('span'); clr.className='chip'; clr.innerText='CLEAR NOTE';
+        clr.onclick = () => document.getElementById('edit-note').value='';
+        chipArea.appendChild(clr);
+        document.getElementById('editModal').style.display='flex'; 
+    }
+    function closeModal() { document.getElementById('editModal').style.display='none'; }
+    async function saveEdit() { 
+        const id = document.getElementById('edit-id').value; const idx = db.findIndex(x => x.id === id); 
+        if(idx === -1) return;
+        db[idx].note = document.getElementById('edit-note').value;
+        db[idx].rep_name = document.getElementById('edit-rep').value;
+        db[idx].name = document.getElementById('edit-name').value;
+        saveDB(); render(); closeModal(); 
+    }
+    function deleteCustomer() { if(confirm("Delete this customer?")) { db = db.filter(x => x.id !== document.getElementById('edit-id').value); saveDB(); render(); closeModal(); } }
+    function shareOrDownload() { const blob = new Blob([JSON.stringify(db)], {type: 'application/json'}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `map_data.json`; a.click(); }
+    function uploadData(i) { const f=i.files[0]; if(!f)return; const r=new FileReader(); r.onload=e=>{try{if(confirm("Load JSON?")){db=JSON.parse(e.target.result);saveDB();populateFilters();resetAndRender();alert("Loaded");}}catch(z){alert("Failed");}}; r.readAsText(f); }
+    function saveDB() { localStorage.setItem(DB_NAME, JSON.stringify(db)); }
+    function clearAll() { if(confirm("Delete ALL Data?")) { localStorage.removeItem(DB_NAME); location.reload(); } }
+</script>
+</body>
+</html>
