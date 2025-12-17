@@ -194,29 +194,18 @@
         }
         .btn-copy:hover { border-color: var(--gold); color: var(--gold); }
 
-        /* 登録フォーム（拡張） */
-        .toggle-card { 
-            background: var(--card); border-radius: var(--radius); margin-top: 30px; 
-            box-shadow: var(--shadow); overflow: hidden; border: 1px solid rgba(0,0,0,0.02);
-        }
-        .toggle-header { 
-            padding: 20px; font-weight: 500; font-size: 1rem; cursor: pointer; 
-            display: flex; justify-content: space-between; background: #fff; color: var(--text-main);
-            font-family: var(--font-serif); letter-spacing: 0.1em;
-        }
-        .toggle-content { padding: 25px; display: none; border-top: 1px solid #f5f5f5; background: #fafafa; }
-        
+        /* モーダル内の登録フォーム用 */
         .mode-switch {
-            display: flex; gap: 15px; margin-bottom: 20px;
+            display: flex; gap: 15px; margin-bottom: 15px; background: #fcfcfc; padding: 10px; border-radius: var(--radius); border: 1px solid #eee;
         }
         .mode-label {
-            display: flex; align-items: center; font-size: 0.85rem; font-weight: 500; cursor: pointer;
+            display: flex; align-items: center; font-size: 0.8rem; font-weight: 500; cursor: pointer;
             color: var(--text-sub); font-family: var(--font-serif);
         }
         .mode-label input { margin-right: 6px; accent-color: var(--gold); }
         .mode-label.active { color: var(--text-main); font-weight: bold; }
 
-        label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--gold); margin-bottom: 8px; margin-top: 20px; font-family: var(--font-eng); letter-spacing: 0.1em; }
+        label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--gold); margin-bottom: 6px; margin-top: 15px; font-family: var(--font-eng); letter-spacing: 0.1em; }
         input[type="text"], textarea { 
             width: 100%; padding: 12px; border: 1px solid #ddd; background: #fff; 
             border-radius: var(--radius); box-sizing: border-box; font-size: 16px; font-family: var(--font-serif);
@@ -225,26 +214,26 @@
 
         /* ボタン群 */
         .btn-main { 
-            width: 100%; padding: 16px; background: var(--dark); color: #fff; 
+            width: 100%; padding: 14px; background: var(--dark); color: #fff; 
             border: none; border-radius: var(--radius); font-weight: 500; cursor: pointer; 
-            margin-top: 25px; font-family: var(--font-eng); letter-spacing: 0.1em;
+            margin-top: 20px; font-family: var(--font-eng); letter-spacing: 0.1em;
             transition: 0.3s;
         }
         .btn-main:hover { background: var(--gold); }
 
-        .data-tools { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+        .data-tools { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
         .btn-sub { 
-            padding: 12px; background: #fff; border: 1px solid #ddd; 
+            padding: 10px; background: #fff; border: 1px solid #ddd; 
             border-radius: var(--radius); font-weight: 500; cursor: pointer; 
-            font-size: 0.85rem; color: var(--text-main); font-family: var(--font-serif);
+            font-size: 0.8rem; color: var(--text-main); font-family: var(--font-serif);
             transition: 0.3s;
         }
         .btn-sub:hover { border-color: var(--gold); color: var(--gold); }
 
         .btn-del { 
-            width: 100%; margin-top: 30px; padding: 12px; background: transparent; 
+            width: 100%; margin-top: 20px; padding: 10px; background: transparent; 
             color: #999; border: 1px solid #eee; border-radius: var(--radius); 
-            font-weight: 500; cursor: pointer; font-size: 0.8rem; transition: 0.3s;
+            font-weight: 500; cursor: pointer; font-size: 0.75rem; transition: 0.3s;
         }
         .btn-del:hover { color: #d32f2f; border-color: #d32f2f; background: #fff5f5; }
 
@@ -278,17 +267,17 @@
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         .modal-content { 
-            background: #fff; padding: 40px; border-radius: 2px; width: 90%; max-width: 450px; 
-            max-height: 85vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.2); 
+            background: #fff; padding: 30px; border-radius: 2px; width: 95%; max-width: 600px; /* 広めに変更 */
+            max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.2); 
             position: relative;
         }
         .modal-content h3 {
             font-family: var(--font-eng); text-align: center; margin-top: 0; 
-            font-weight: 600; letter-spacing: 0.2em; color: var(--text-main); margin-bottom: 30px;
+            font-weight: 600; letter-spacing: 0.2em; color: var(--text-main); margin-bottom: 25px;
         }
 
         .settings-section { 
-            border-bottom: 1px solid #f0f0f0; padding-bottom: 20px; margin-bottom: 20px; 
+            border-bottom: 1px solid #f0f0f0; padding-bottom: 25px; margin-bottom: 25px; 
         }
         .settings-section:last-child { border-bottom: none; margin-bottom: 0; }
 
@@ -385,39 +374,6 @@
         <div id="result-area"></div>
         <button id="load-more-btn" class="btn-load-more" onclick="loadMore()" style="display:none;">VIEW MORE</button>
 
-        <div class="toggle-card">
-            <div class="toggle-header" onclick="toggleInput()">
-                <span>＋ DATA REGISTRATION</span> <span>▼</span>
-            </div>
-            <div class="toggle-content" id="input-area">
-                <div class="mode-switch">
-                    <label class="mode-label active">
-                        <input type="radio" name="regMode" value="new" checked onchange="changeRegMode()"> NEW REG (6 Cols)
-                    </label>
-                    <label class="mode-label">
-                        <input type="radio" name="regMode" value="update" onchange="changeRegMode()"> UPDATE BUILDING (2 Cols)
-                    </label>
-                </div>
-
-                <div id="mode-new-area">
-                    <label>REP NAME</label>
-                    <input type="text" id="repName" placeholder="e.g. Sato">
-                </div>
-                
-                <label id="csv-label">DATA PASTE (6 Cols: ID|Corp|Shop|Building|Addr|Tel)</label>
-                <textarea id="csvInput" placeholder="R001	(Inc)ABC	Omiya	XX Building 3F	Saitama...	090-1234-5678" style="height:120px;"></textarea>
-                
-                <button class="btn-main" id="runBtn" onclick="processData()">EXECUTE</button>
-                
-                <div class="data-tools">
-                    <button class="btn-sub" onclick="shareOrDownload()">💾 SAVE JSON</button>
-                    <button class="btn-sub" onclick="document.getElementById('fileInput').click()">📂 LOAD JSON</button>
-                    <input type="file" id="fileInput" accept=".json,application/json" style="display:none" onchange="uploadData(this)">
-                </div>
-                <button class="btn-del" onclick="clearAll()">DELETE ALL DATA</button>
-                <div id="log-area" style="margin-top:10px; font-size:0.7rem; color:#999; text-align:center;"></div>
-            </div>
-        </div>
         <div style="height:80px;"></div>
     </div>
 </div>
@@ -425,6 +381,7 @@
 <div id="settingsModal" class="modal-overlay">
     <div class="modal-content">
         <h3>SETTINGS</h3>
+        
         <div class="settings-section">
             <label>API KEY</label>
             <div style="display:flex; gap:10px;">
@@ -432,10 +389,42 @@
                 <button onclick="saveKeyAndInit()" style="background:var(--dark); color:#fff; border:none; border-radius:2px; padding:0 15px; cursor:pointer;">SAVE</button>
             </div>
         </div>
+
+        <div class="settings-section">
+            <label style="color:var(--text-main); font-size:1rem; margin-bottom:15px;">📥 DATA IMPORT</label>
+            <div class="mode-switch">
+                <label class="mode-label active">
+                    <input type="radio" name="regMode" value="new" checked onchange="changeRegMode()"> NEW REG (6 Cols)
+                </label>
+                <label class="mode-label">
+                    <input type="radio" name="regMode" value="update" onchange="changeRegMode()"> UPDATE BUILDING (2 Cols)
+                </label>
+            </div>
+
+            <div id="mode-new-area">
+                <label>REP NAME</label>
+                <input type="text" id="repName" placeholder="e.g. Sato">
+            </div>
+            
+            <label id="csv-label">DATA PASTE (6 Cols: ID|Corp|Shop|Building|Addr|Tel)</label>
+            <textarea id="csvInput" placeholder="R001	(Inc)ABC	Omiya	XX Building 3F	Saitama...	090-1234-5678" style="height:120px;"></textarea>
+            
+            <button class="btn-main" id="runBtn" onclick="processData()">EXECUTE IMPORT</button>
+            
+            <div class="data-tools">
+                <button class="btn-sub" onclick="shareOrDownload()">💾 SAVE JSON</button>
+                <button class="btn-sub" onclick="document.getElementById('fileInput').click()">📂 LOAD JSON</button>
+                <input type="file" id="fileInput" accept=".json,application/json" style="display:none" onchange="uploadData(this)">
+            </div>
+            <button class="btn-del" onclick="clearAll()">DELETE ALL DATA</button>
+            <div id="log-area" style="margin-top:10px; font-size:0.7rem; color:#999; text-align:center;"></div>
+        </div>
+
         <div class="settings-section">
             <label>MY PINS (BLUE)</label>
             <div id="rep-checklist" class="rep-checklist"></div>
         </div>
+        
         <div class="settings-section">
             <label>QUICK CHIPS</label>
             <div style="display:flex; gap:10px; margin-bottom:10px;">
@@ -444,12 +433,14 @@
             </div>
             <div id="settings-chip-list" class="quick-chips"></div>
         </div>
+        
         <div class="settings-section">
             <label>STORAGE</label>
             <div style="font-size:0.8rem; margin-bottom:8px;">Current DB: <span id="current-db-name" style="font-weight:600;"></span></div>
             <div id="storage-list" style="max-height:100px; overflow-y:auto; border:1px solid #eee; padding:5px;"></div>
         </div>
-        <button class="btn-sub" style="width:100%; background:#f5f5f5; border:none;" onclick="document.getElementById('settingsModal').style.display='none'">CLOSE</button>
+
+        <button class="btn-sub" style="width:100%; background:#f5f5f5; border:none;" onclick="document.getElementById('settingsModal').style.display='none'">CLOSE SETTINGS</button>
     </div>
 </div>
 
@@ -497,7 +488,6 @@
         localStorage.removeItem('map_apiKey');
     };
 
-    function toggleInput() { const el=document.getElementById('input-area'); el.style.display=el.style.display==='block'?'none':'block'; }
     function normalize(s) { return (s||"").replace(/[Ａ-Ｚａ-ｚ０-９]/g, c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0)).toLowerCase().replace(/\s+/g,""); }
     function log(msg) { document.getElementById('log-area').innerText = msg; }
 
@@ -692,7 +682,6 @@
         const btn = document.getElementById('runBtn'); btn.disabled = true; btn.innerText = "Processing...";
         
         if (mode === 'update') {
-            // --- 更新モード (Rコード | ビル名) ---
             try {
                 const lines = csv.split('\n');
                 let updateCount = 0;
@@ -701,8 +690,6 @@
                     if(cols.length < 2) continue;
                     const rCode = cols[0];
                     const build = cols[1];
-                    
-                    // Rコードで検索してビル名を更新
                     const target = db.find(d => d.r_code === rCode);
                     if(target) {
                         target.building = build;
@@ -712,30 +699,24 @@
                 saveDB(); render();
                 alert(`${updateCount} Records Updated!`);
             } finally {
-                btn.disabled = false; btn.innerText = "EXECUTE";
+                btn.disabled = false; btn.innerText = "EXECUTE IMPORT";
             }
         } else {
-            // --- 新規登録モード (6列) ---
             const key = document.getElementById('apiKey').value.trim();
             const newRepName = document.getElementById('repName').value.trim();
-            
             try {
                 await initSystem(localStorage.getItem('map_apiKey'));
                 const lines = csv.split('\n'); let count = 0;
                 for(let line of lines) {
                     const cols = line.trim().split(/\t/).map(s=>s.trim());
-                    // 6列: R(0)|Corp(1)|Shop(2)|Build(3)|Addr(4)|Tel(5)
                     if(cols.length < 5) continue; 
-                    
                     let r=cols[0];
                     let name=(cols[1]+" "+cols[2]).trim();
                     let build = cols[3];
                     let addr = cols[4];
                     let tel = cols[5]||"";
 
-                    // 以前の5列データが混ざった場合のガード（列が足りない場合、ビル名を空にして住所をずらす）
                     if (cols.length === 5) {
-                        // 5列の場合: R|Corp|Shop|Addr|Tel
                         build = "";
                         addr = cols[3];
                         tel = cols[4]||"";
@@ -761,7 +742,7 @@
                 }
                 saveDB(); populateFilters(); resetAndRender(); 
                 alert(`${count} Completed`);
-            } finally { btn.disabled = false; btn.innerText = "EXECUTE"; }
+            } finally { btn.disabled = false; btn.innerText = "EXECUTE IMPORT"; }
         }
     }
 
@@ -807,7 +788,7 @@
             const pinView = document.createElement("div");
             pinView.style.width = isHit ? "22px" : "16px";
             pinView.style.height = pinView.style.width;
-            pinView.style.backgroundColor = isHit ? "#FFD60A" : (isMe ? "#5d7ea3" : "#bf5b5b"); /* Muted Blue / Muted Red */
+            pinView.style.backgroundColor = isHit ? "#FFD60A" : (isMe ? "#5d7ea3" : "#bf5b5b"); 
             pinView.style.borderRadius = "50%"; pinView.style.border = "2px solid white"; pinView.style.boxShadow = "0 2px 5px rgba(0,0,0,0.2)";
             if(hasSearch && !isHit) pinView.style.opacity = "0.6";
 
