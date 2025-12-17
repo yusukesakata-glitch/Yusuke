@@ -177,7 +177,7 @@
             font-size: 0.7rem; color: #5a4b35; letter-spacing: 0.05em;
         }
         
-        .action-area { display: flex; flex-direction: column; gap: 10px; margin-left: 15px; }
+        .action-area { display: flex; flex-direction: column; gap: 8px; margin-left: 15px; } /* gap調整 */
         .icon-btn { 
             width: 44px; height: 44px; border-radius: 50%; background: #fcfcfc; border: 1px solid #eee;
             display: flex; align-items: center; justify-content: center; 
@@ -186,6 +186,7 @@
         .icon-btn:hover { background: var(--gold); color: #fff; border-color: var(--gold); }
         .icon-btn.call { color: var(--text-main); } 
         .icon-btn.map { color: var(--text-main); }
+        .icon-btn.edit { color: var(--text-main); }
 
         .btn-copy { 
             font-size: 0.7rem; background: transparent; border: 1px solid #ddd; 
@@ -862,7 +863,12 @@
             
             const div = document.createElement('div');
             div.className = 'customer-item';
-            div.innerHTML = `<div style="flex:1;"><div class="info-main"><span style="background:${color};width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:10px;vertical-align:middle;"></span>${c.name}</div><div class="info-sub"><span class="tag">${c.r_code||"-"}</span>${c.rep_name||""}</div><div class="info-sub">📞 ${c.tel||""} <button class="btn-copy" onclick="copyToClipboard('${c.tel}')">COPY</button></div>${buildHtml}<div class="info-sub">${c.address}</div><div style="font-size:0.75rem;color:#bfa37e;margin-top:6px;font-style:italic;">${c.note?'📝 '+c.note:''}</div></div><div class="action-area"><a href="tel:${c.tel}" class="icon-btn call">📞</a><button onclick="panToMap(${c.lat},${c.lng})" class="icon-btn map">📍</button></div>`;
+            div.innerHTML = `<div style="flex:1;"><div class="info-main"><span style="background:${color};width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:10px;vertical-align:middle;"></span>${c.name}</div><div class="info-sub"><span class="tag">${c.r_code||"-"}</span>${c.rep_name||""}</div><div class="info-sub">📞 ${c.tel||""} <button class="btn-copy" onclick="copyToClipboard('${c.tel}')">COPY</button></div>${buildHtml}<div class="info-sub">${c.address}</div><div style="font-size:0.75rem;color:#bfa37e;margin-top:6px;font-style:italic;">${c.note?'📝 '+c.note:''}</div></div>
+            <div class="action-area">
+                <button onclick="openEdit('${c.id}')" class="icon-btn edit">✏️</button>
+                <a href="tel:${c.tel}" class="icon-btn call">📞</a>
+                <button onclick="panToMap(${c.lat},${c.lng})" class="icon-btn map">📍</button>
+            </div>`;
             area.appendChild(div);
         });
         const btnArea = document.getElementById('load-more-btn');
@@ -884,7 +890,6 @@
     
     function loadMore() { currentLimit += parseInt(document.getElementById('limitSelect').value) || 100; render(); }
     
-    // ★修正版：編集モーダルを開く
     function openEdit(id) { 
         const d = db.find(x => x.id === id); 
         if(!d) return; 
@@ -898,7 +903,6 @@
         document.getElementById('edit-tel').value = d.tel||""; 
         document.getElementById('edit-addr').value = d.address; 
         
-        // ★重要：住所変更検知のために元の住所を隠しフィールドに保存
         document.getElementById('orig-addr').value = d.address; 
 
         const chipArea = document.getElementById('edit-chip-area');
@@ -915,7 +919,6 @@
 
     function closeModal() { document.getElementById('editModal').style.display='none'; }
 
-    // ★修正版：編集保存（住所変更時のピン移動対応）
     async function saveEdit() { 
         const id = document.getElementById('edit-id').value; 
         const idx = db.findIndex(x => x.id === id); 
@@ -924,7 +927,6 @@
         const newAddr = document.getElementById('edit-addr').value.trim();
         const oldAddr = document.getElementById('orig-addr').value;
 
-        // 全フィールド更新
         db[idx].note = document.getElementById('edit-note').value;
         db[idx].rep_name = document.getElementById('edit-rep').value;
         db[idx].r_code = document.getElementById('edit-r').value;
@@ -933,7 +935,6 @@
         db[idx].tel = document.getElementById('edit-tel').value;
         db[idx].address = newAddr;
 
-        // 住所変更時は座標も再取得
         if(newAddr !== oldAddr && newAddr !== "" && geocoder) {
             try {
                 const coords = await new Promise((resolve, reject) => {
