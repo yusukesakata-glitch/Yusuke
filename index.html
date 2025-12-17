@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Shippori+Mincho:wght@400;500&display=swap" rel="stylesheet">
 
     <style>
-        /* --- デザイン定義（Sanctuaryテーマベース） --- */
+        /* --- デザイン定義 --- */
         :root {
             /* カラーパレット */
             --bg: #f9f8f6;          /* 背景：生成り色 */
@@ -19,7 +19,7 @@
             --gold-light: #e6dccf;  /* 薄いゴールド */
             --dark: #1a1a1a;        /* 締め色：黒に近いグレー */
             
-            /* 機能色（マップピン等のロジック用色はJS依存のため維持しつつ、馴染むように調整） */
+            /* 機能色 */
             --primary: #bfa37e;     
             --accent-blue: #5d7ea3; /* 青ピンの代わり（落ち着いた藍色） */
             --accent-red: #bf5b5b;  /* 赤ピンの代わり（落ち着いた赤） */
@@ -124,7 +124,7 @@
             border: 1px solid rgba(0,0,0,0.05);
         }
         
-        /* トグルスイッチ（エレガントver） */
+        /* トグルスイッチ */
         .toggle-switch { position: relative; display: inline-block; width: 40px; height: 22px; }
         .toggle-switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ddd; transition: .4s; border-radius: 22px; }
@@ -184,7 +184,6 @@
             text-decoration: none; font-size: 1.1rem; transition: all 0.3s; color: var(--text-main);
         }
         .icon-btn:hover { background: var(--gold); color: #fff; border-color: var(--gold); }
-        /* アイコンの色味を落ち着かせる */
         .icon-btn.call { color: var(--text-main); } 
         .icon-btn.map { color: var(--text-main); }
 
@@ -195,7 +194,7 @@
         }
         .btn-copy:hover { border-color: var(--gold); color: var(--gold); }
 
-        /* 登録フォーム（トグル） */
+        /* 登録フォーム */
         .toggle-card { 
             background: var(--card); border-radius: var(--radius); margin-top: 30px; 
             box-shadow: var(--shadow); overflow: hidden; border: 1px solid rgba(0,0,0,0.02);
@@ -247,7 +246,7 @@
         }
         .btn-load-more:hover { background: var(--gold); color: white; }
 
-        /* チップ（クイック入力） */
+        /* チップ */
         .quick-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
         .chip { 
             font-size: 0.75rem; background: #fff; padding: 6px 14px; border-radius: 20px; 
@@ -294,7 +293,7 @@
             font-family: var(--font-serif); border: 1px solid #eee;
         }
 
-        /* Info Window (Google Map吹き出し) */
+        /* Info Window */
         .info-window-container { font-family: var(--font-serif); padding: 0 5px 5px 0; max-width: 260px; max-height: 250px; overflow-y: auto; }
         .info-window-card { margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
         .info-window-card:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
@@ -311,7 +310,6 @@
         .btn-edit { background: #f0f0f0; color: #333; }
         .btn-edit:hover { background: #e0e0e0; }
         
-        /* スクロールバーのカスタマイズ（Webkit） */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; }
         ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
@@ -451,10 +449,6 @@
 </div>
 
 <script>
-    /* =======================================================
-      機能ロジックは一切変更していません (Design Override Only)
-      =======================================================
-    */
     const DB_NAME = "map_db"; 
     let currentLimit = 100;
     let activeReps = new Set();
@@ -496,7 +490,7 @@
         if(k) {
             document.getElementById('apiKey').value = k;
             document.getElementById('map-placeholder-msg').innerText = "🔑 Initializing...";
-            setTimeout(() => initSystem(k), 500); // 描画安定待ち
+            setTimeout(() => initSystem(k), 500); 
         } else {
             document.getElementById('map-placeholder-msg').innerHTML = "Please set API Key<br>in Settings";
         }
@@ -569,7 +563,6 @@
 
     async function saveKeyAndInit() { const k=document.getElementById('apiKey').value; if(!k)return alert("Enter Key"); localStorage.setItem('map_apiKey', k); await initSystem(k); alert("Saved."); }
      
-    // ★ 修正版 initSystem
     async function initSystem(key) {
         if(window.google && window.google.maps && map) return;
         if(!window.google || !window.google.maps) {
@@ -715,7 +708,7 @@
             const pinView = document.createElement("div");
             pinView.style.width = isHit ? "22px" : "16px";
             pinView.style.height = pinView.style.width;
-            pinView.style.backgroundColor = isHit ? "#FFD60A" : (isMe ? "#5d7ea3" : "#bf5b5b"); /* Blue -> Muted Blue, Red -> Muted Red */
+            pinView.style.backgroundColor = isHit ? "#FFD60A" : (isMe ? "#5d7ea3" : "#bf5b5b"); /* Muted Blue / Muted Red */
             pinView.style.borderRadius = "50%"; pinView.style.border = "2px solid white"; pinView.style.boxShadow = "0 2px 5px rgba(0,0,0,0.2)";
             if(hasSearch && !isHit) pinView.style.opacity = "0.6";
 
@@ -783,7 +776,7 @@
 
         displayTargets.forEach(c => {
             const isMe = targetReps.includes(c.rep_name);
-            const color = isMe ? "#5d7ea3" : "#bf5b5b"; // Muted Blue / Muted Red for list dots
+            const color = isMe ? "#5d7ea3" : "#bf5b5b"; // Muted Blue / Muted Red
             const div = document.createElement('div');
             div.className = 'customer-item';
             div.innerHTML = `<div style="flex:1;"><div class="info-main"><span style="background:${color};width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:10px;vertical-align:middle;"></span>${c.name}</div><div class="info-sub"><span class="tag">${c.r_code||"-"}</span>${c.rep_name||""}</div><div class="info-sub">📞 ${c.tel||""} <button class="btn-copy" onclick="copyToClipboard('${c.tel}')">COPY</button></div><div class="info-sub">${c.address}</div><div style="font-size:0.75rem;color:#bfa37e;margin-top:6px;font-style:italic;">${c.note?'📝 '+c.note:''}</div></div><div class="action-area"><a href="tel:${c.tel}" class="icon-btn call">📞</a><button onclick="panToMap(${c.lat},${c.lng})" class="icon-btn map">📍</button></div>`;
@@ -793,7 +786,20 @@
         btnArea.style.display = (targets.length > currentLimit && document.getElementById('limitSelect').value !== 'ALL') ? 'block' : 'none';
     }
 
-    function panToMap(lat, lng) { map.setZoom(17); map.panTo({lat, lng}); if(window.innerWidth < 900) document.querySelector('.left-section').scrollIntoView({behavior:'smooth', block:'start'}); }
+    function panToMap(lat, lng) { 
+        map.setZoom(17); 
+        map.panTo({lat, lng}); 
+        
+        // ★修正: ピンを押したら強制的に「連動モード」をONにして周辺を表示する
+        const toggle = document.getElementById('mapSyncToggle');
+        if(!toggle.checked) {
+            toggle.checked = true;
+            toggleMapSync(); 
+        }
+
+        if(window.innerWidth < 900) document.querySelector('.left-section').scrollIntoView({behavior:'smooth', block:'start'}); 
+    }
+    
     function loadMore() { currentLimit += parseInt(document.getElementById('limitSelect').value) || 100; render(); }
     
     function openEdit(id) { 
