@@ -8,15 +8,15 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 
     <style>
-        /* --- デザイン定義（白ベース×赤アクセント） --- */
+        /* --- デザイン定義 --- */
         :root {
-            --bg: #F5F5F7;          /* 背景：薄いグレー */
-            --card: #FFFFFF;        /* カード：白 */
-            --text-main: #333333;   /* 文字：濃いグレー */
-            --text-sub: #666666;    /* サブ文字：グレー */
-            --accent-red: #cc3300;  /* アクセント：赤 */
-            --tag-bg: #EFEBE4;      /* タグ背景：ベージュ */
-            --tag-text: #5D5548;    /* タグ文字：茶グレー */
+            --bg: #F5F5F7;
+            --card: #FFFFFF;
+            --text-main: #333333;
+            --text-sub: #666666;
+            --accent-red: #cc3300; /* 赤アクセント */
+            --tag-bg: #EFEBE4;
+            --tag-text: #5D5548;
             --shadow: 0 2px 8px rgba(0,0,0,0.05);
             --radius: 8px;
         }
@@ -49,35 +49,32 @@
         /* ヘッダー */
         .header-area { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         h1 { font-size: 1.2rem; font-weight: 700; margin: 0; }
-        .btn-settings { background: #fff; border: 1px solid #ccc; padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 5px;}
+        .btn-settings { background: #fff; border: 1px solid #ccc; padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; cursor: pointer; display:flex; align-items:center; gap:4px; }
 
-        /* フィルタ・検索 */
+        /* 検索・フィルタ */
         .filter-area { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
         select { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ddd; background: #fff; }
         .list-search-box { position: relative; margin-bottom: 15px; }
         .list-search-box input { width: 100%; padding: 10px 10px 10px 35px; border-radius: 6px; border: 1px solid #ddd; box-sizing: border-box; }
         .list-search-icon { position: absolute; left: 10px; top: 10px; color: #aaa; }
 
-        /* --- リストカード (ご指定の並び順) --- */
+        /* --- リストカード --- */
         .customer-item { 
             background: var(--card); padding: 20px; border-radius: var(--radius); 
             margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;
             box-shadow: var(--shadow); border: 1px solid #eee;
         }
-
         .info-col-left { flex: 1; display: flex; flex-direction: column; gap: 6px; }
 
-        /* 1. 名称 (赤丸付き) */
-        .info-main { 
-            font-size: 1rem; font-weight: 700; display: flex; align-items: flex-start; line-height: 1.4; 
-        }
+        /* タイトル (赤丸付き) */
+        .info-main { font-size: 1rem; font-weight: 700; display: flex; align-items: flex-start; line-height: 1.4; }
         .info-main::before {
             content: ''; display: inline-block; width: 8px; height: 8px; 
             background: var(--accent-red); border-radius: 50%; 
             margin-right: 10px; margin-top: 6px; flex-shrink: 0;
         }
 
-        /* 2. Rコード + 担当者 */
+        /* Rコード + 担当者 */
         .info-meta-row { display: flex; align-items: center; gap: 10px; margin-left: 18px; }
         .tag-id { 
             background: var(--tag-bg); color: var(--tag-text); padding: 2px 8px; 
@@ -85,16 +82,12 @@
         }
         .text-rep { font-size: 0.85rem; font-weight: 500; }
 
-        /* 3. 住所 */
+        /* 住所・ビル・電話 */
         .info-address { font-size: 0.85rem; color: var(--text-main); margin-left: 18px; line-height: 1.4; }
-
-        /* 4. ビル名 */
         .info-building { 
             font-size: 0.85rem; color: var(--text-main); margin-left: 18px; line-height: 1.4; 
             font-weight: 700; display: flex; align-items: center; gap: 5px;
         }
-
-        /* 5. 電話番号 */
         .info-tel-row { display: flex; align-items: center; gap: 8px; margin-left: 18px; margin-top: 2px; }
         .tel-number { font-size: 0.95rem; font-weight: 500; letter-spacing: 0.05em; font-family: 'Roboto', sans-serif;}
         .btn-copy-sm { 
@@ -102,15 +95,13 @@
             border-radius: 2px; background: #fff; color: #666; cursor: pointer; 
         }
 
-        /* SVGアイコン */
+        /* アイコン */
         .svg-icon { width: 16px; height: 16px; fill: currentColor; flex-shrink: 0; }
         .icon-red { color: var(--accent-red); }
         .icon-build { color: #d4a373; }
 
-        /* 右側のボタン群 (縦並び) */
-        .action-col-right { 
-            display: flex; flex-direction: column; gap: 10px; margin-left: 10px; padding-left: 10px; border-left: 1px solid #f0f0f0;
-        }
+        /* 右側ボタン (縦並び) */
+        .action-col-right { display: flex; flex-direction: column; gap: 10px; margin-left: 10px; padding-left: 10px; border-left: 1px solid #f0f0f0; }
         .circle-btn {
             width: 36px; height: 36px; border-radius: 50%; background: #fff; 
             border: 1px solid #eee; display: flex; align-items: center; justify-content: center;
@@ -119,9 +110,9 @@
         .circle-btn:hover { background: #f9f9f9; border-color: var(--accent-red); }
         .circle-btn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; }
         .circle-btn.red-icon svg { stroke: var(--accent-red); }
-        .circle-btn.pin svg { fill: var(--accent-red); stroke: none; } /* ピンは塗りつぶし */
+        .circle-btn.pin svg { fill: var(--accent-red); stroke: none; }
 
-        /* マップ検索・ボタン */
+        /* マップ */
         .place-search-box { display: flex; margin-bottom: 10px; }
         .place-search-input { flex:1; padding:10px; border:1px solid #ccc; border-radius:4px 0 0 4px; outline:none; }
         .place-search-btn { padding:0 15px; border:1px solid #ccc; border-left:none; background:#fff; border-radius:0 4px 4px 0; cursor:pointer; }
@@ -136,7 +127,7 @@
 
         #gpsBtn { position: absolute; bottom: 20px; right: 10px; width: 40px; height: 40px; border-radius: 50%; background: #fff; border: none; box-shadow: 0 2px 6px rgba(0,0,0,0.2); cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; z-index: 10; }
 
-        /* モーダル共通 */
+        /* モーダル */
         .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:none; justify-content:center; align-items:center; z-index:9999; }
         .modal-content { background:#fff; padding:25px; border-radius:12px; width:90%; max-width:500px; max-height:85vh; overflow-y:auto; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
         
@@ -145,12 +136,15 @@
         .btn-sub { padding: 8px 12px; background: #eee; border: none; border-radius: 6px; cursor: pointer; color: #333; }
         .btn-del { width: 100%; padding: 10px; background: #fff0f0; color: red; border: none; border-radius: 6px; cursor: pointer; margin-top: 10px; font-weight: bold; }
 
-        /* 統計エリア */
+        .quick-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px; }
+        .chip { font-size: 0.75rem; background: #f0f0f0; padding: 4px 10px; border-radius: 15px; cursor: pointer; border: 1px solid #ddd; }
+        .chip:active { background: var(--accent-red); color: white; }
+        .chip-del { color: red; margin-left: 5px; cursor: pointer; font-weight: bold; }
+
         #stats-area { background: #fff; padding: 10px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #eee; }
         .stats-grid { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px; }
         .stats-item { background: #f0f0f0; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; }
         .stats-item.selected { background: var(--accent-red); color: white; }
-
         #load-more-btn { width: 100%; padding: 10px; background: #fff; border: 1px solid #ccc; border-radius: 20px; cursor: pointer; margin-top: 10px; display: none; color: #555; }
     </style>
 </head>
@@ -248,6 +242,21 @@
             <div id="rep-checklist" style="max-height:100px; overflow-y:auto; border:1px solid #eee; padding:5px;"></div>
         </div>
 
+        <div class="settings-section">
+            <label style="font-weight:bold; display:block; margin-bottom:5px;">📝 定型文チップ設定</label>
+            <div style="display:flex; gap:5px; margin-bottom:8px;">
+                <input type="text" id="newChipInput" placeholder="例: 再訪予定" style="flex:1; padding:8px; border:1px solid #ddd; border-radius:4px;">
+                <button onclick="addChip()" class="btn-sub">追加</button>
+            </div>
+            <div id="settings-chip-list" class="quick-chips"></div>
+        </div>
+
+        <div class="settings-section">
+            <label style="font-weight:bold; display:block; margin-bottom:5px;">💾 保存データ管理</label>
+            <div style="font-size:0.8rem; margin-bottom:5px;">使用中のDB: <span id="current-db-name" style="font-weight:bold;"></span></div>
+            <div id="storage-list" style="max-height:100px; overflow-y:auto; border:1px solid #eee; padding:5px;"></div>
+        </div>
+
         <button onclick="document.getElementById('settingsModal').style.display='none'" class="btn-sub" style="width:100%;">閉じる</button>
     </div>
 </div>
@@ -258,7 +267,8 @@
         <input type="hidden" id="edit-id">
         
         <label style="display:block; font-size:0.8rem; color:#666;">備考</label>
-        <textarea id="edit-note" style="width:100%; height:50px; padding:8px; border:1px solid #ddd; border-radius:4px; box-sizing:border-box; margin-bottom:10px;"></textarea>
+        <textarea id="edit-note" style="width:100%; height:50px; padding:8px; border:1px solid #ddd; border-radius:4px; box-sizing:border-box; margin-bottom:5px;"></textarea>
+        <div id="edit-chip-area" class="quick-chips" style="margin-bottom:15px;"></div>
         
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
             <div>
@@ -297,6 +307,7 @@
     let activeReps = new Set();
     let mapSyncMode = false;
     let targetReps = []; 
+    let quickChips = ["不在", "移転", "商談中", "完了"];
     let db = [];
     let map, geocoder;
     let markers = [];
@@ -306,10 +317,14 @@
         const k = localStorage.getItem('map_apiKey');
         const d = localStorage.getItem(DB_NAME);
         const tr = localStorage.getItem('map_target_reps_json');
+        const qc = localStorage.getItem('map_quick_chips_json');
         
         if(tr) { try { targetReps = JSON.parse(tr); } catch(e) { targetReps=[]; } }
+        if(qc) { try { quickChips = JSON.parse(qc); } catch(e) {} }
         if(d) { try { db = JSON.parse(d); populateFilters(); resetAndRender(); } catch(e){ db=[]; } }
         
+        document.getElementById('current-db-name').innerText = DB_NAME;
+
         if(k) {
             document.getElementById('apiKey').value = k;
             initSystem(k);
@@ -321,13 +336,13 @@
     async function initSystem(key) {
         if(window.google && window.google.maps && map) return;
         
-        // AdvancedMarkerではなく標準マーカーを使うためlibraries=markerは不要だが念のため
         if(!document.querySelector('script[src*="maps.googleapis.com"]')) {
             await new Promise((resolve) => {
                 const s = document.createElement('script');
                 s.src = `https://maps.googleapis.com/maps/api/js?key=${key}&loading=async&libraries=places,geocoding`;
                 s.async = true;
                 s.onload = resolve;
+                s.onerror = () => alert("Google Maps APIの読み込みに失敗しました。APIキーを確認してください。");
                 document.head.appendChild(s);
             });
         }
@@ -375,11 +390,9 @@
             const div = document.createElement('div');
             div.className = 'customer-item';
             
-            // アイコン
             const redPhoneIcon = '<svg class="svg-icon icon-red" viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 1.25 1.25 1.45 2.45 1.83 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>';
             const buildIcon = '<svg class="svg-icon icon-build" viewBox="0 0 24 24"><path d="M10 2v18H4V6H2v16h14v-2h2v2h2V8h-2v2h-2v-2h-2V2h-4zm2 2h2v2h-2V4zM6 8h2v2H6V8zm0 4h2v2H6v-2zm8 0h2v2h-2v-2zm-8 4h2v2H6v-2zm8 0h2v2h-2v-2z"/></svg>';
 
-            // HTML生成 (指定順序: 名前 -> R/担当 -> 住所 -> ビル -> 電話)
             const buildHtml = c.building ? `<div class="info-building">${buildIcon} ${c.building}</div>` : "";
             const telHtml = c.tel ? 
                 `<div class="info-tel-row">
@@ -398,7 +411,7 @@
                     <div class="info-address">${c.address}</div>
                     ${buildHtml}
                     ${telHtml}
-                    ${c.note ? `<div style="margin-left:18px; font-size:0.75rem; color:#D32F2F; margin-top:4px;">📝 ${c.note}</div>` : ''}
+                    ${c.note ? `<div style="margin-left:18px; font-size:0.75rem; color:#cc3300; margin-top:4px;">📝 ${c.note}</div>` : ''}
                 </div>
 
                 <div class="action-col-right">
@@ -416,7 +429,6 @@
             area.appendChild(div);
         });
 
-        // 統計更新
         const counts = {};
         filtered.forEach(d => counts[d.rep_name||"不明"] = (counts[d.rep_name||"不明"]||0)+1);
         const statsArea = document.getElementById('stats-detail'); statsArea.innerHTML="";
@@ -434,7 +446,6 @@
         document.getElementById('load-more-btn').style.display = (filtered.length > currentLimit) ? 'block' : 'none';
     }
 
-    // ★修正: 標準マーカー(google.maps.Marker)を使用（APIキーのみで動作保証）
     function updateMapPins(targets) {
         if(!map) return;
         markers.forEach(m => m.setMap(null)); markers = [];
@@ -442,9 +453,7 @@
         targets.forEach(c => {
             if(!c.lat || !c.lng) return;
             const isMe = targetReps.includes(c.rep_name);
-            
-            // SVGマーカーの作成（円形）
-            const color = isMe ? "#2196F3" : "#D32F2F"; // 青 or 赤
+            const color = isMe ? "#2196F3" : "#D32F2F"; 
             const marker = new google.maps.Marker({
                 position: {lat:c.lat, lng:c.lng},
                 map: map,
@@ -458,7 +467,6 @@
                     strokeWeight: 2
                 }
             });
-
             const infoContent = `<div style="font-weight:bold; color:#333;">${c.name}</div><div style="font-size:0.85rem;">${c.building||""}</div>`;
             const infowindow = new google.maps.InfoWindow({ content: infoContent });
             marker.addListener("click", () => infowindow.open(map, marker));
@@ -466,7 +474,6 @@
         });
     }
 
-    // --- その他機能 ---
     function copyToClipboard(text) { navigator.clipboard.writeText(text).then(() => alert("コピーしました")); }
     function normalize(s) { return (s||"").replace(/[Ａ-Ｚａ-ｚ０-９]/g, c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0)).toLowerCase().replace(/\s+/g,""); }
     function getPrefecture(a) { const m=a.match(/(...??[都道府県])/); return m?m[1]:"その他"; }
@@ -505,9 +512,12 @@
         }
     }
 
+    // --- 設定・チップ機能 ---
     function openSettings() {
         document.getElementById('settingsModal').style.display='flex';
         renderRepChecklist();
+        renderChipsSettings();
+        renderStorageList();
     }
     
     function renderRepChecklist() {
@@ -527,6 +537,57 @@
         else targetReps = targetReps.filter(n => n !== box.value);
         localStorage.setItem('map_target_reps_json', JSON.stringify(targetReps));
         render();
+    }
+
+    function renderChipsSettings() {
+        const list = document.getElementById('settings-chip-list');
+        list.innerHTML = "";
+        quickChips.forEach((c, idx) => {
+            const span = document.createElement('span'); span.className = 'chip';
+            span.innerHTML = `${c} <span class="chip-del" onclick="deleteChip(${idx})">×</span>`;
+            span.onclick = (e) => { if(e.target.className !== 'chip-del') e.stopPropagation(); }; 
+            list.appendChild(span);
+        });
+    }
+    function addChip() {
+        const val = document.getElementById('newChipInput').value.trim();
+        if(val) {
+            quickChips.push(val);
+            localStorage.setItem('map_quick_chips_json', JSON.stringify(quickChips));
+            document.getElementById('newChipInput').value = "";
+            renderChipsSettings();
+        }
+    }
+    function deleteChip(idx) {
+        if(confirm("削除しますか？")) {
+            quickChips.splice(idx, 1);
+            localStorage.setItem('map_quick_chips_json', JSON.stringify(quickChips));
+            renderChipsSettings();
+        }
+    }
+    function addNote(text) { 
+        const area = document.getElementById('edit-note'); 
+        area.value = (area.value ? area.value + " " : "") + text; 
+    }
+
+    function renderStorageList() {
+        const list = document.getElementById('storage-list'); list.innerHTML = "";
+        for(let i=0; i<localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if(key.startsWith('map_db')) {
+                const div = document.createElement('div'); 
+                div.style.display="flex"; div.style.justifyContent="space-between"; div.style.padding="4px 0";
+                div.innerHTML = `<div style="font-size:0.85rem;">${key}</div><button onclick="forceDelete('${key}')" class="btn-sub" style="font-size:0.7rem; padding:2px 5px;">削除</button>`;
+                list.appendChild(div);
+            }
+        }
+    }
+    function forceDelete(key) { 
+        if(confirm(`本当に「${key}」を削除しますか？`)) { 
+            localStorage.removeItem(key); 
+            if(key===DB_NAME) { db=[]; render(); } 
+            renderStorageList(); 
+        } 
     }
 
     function changeRegMode() {
@@ -593,7 +654,7 @@
         });
     }
 
-    function saveKeyAndInit() { localStorage.setItem('map_apiKey', document.getElementById('apiKey').value); location.reload(); }
+    function saveKeyAndInit() { localStorage.setItem('map_apiKey', document.getElementById('apiKey').value); alert("保存しました。リロードします"); location.reload(); }
     function saveDB() { localStorage.setItem(DB_NAME, JSON.stringify(db)); }
     function clearAll() { if(confirm("全削除しますか？")) { localStorage.removeItem(DB_NAME); location.reload(); } }
     
@@ -611,6 +672,16 @@
         document.getElementById('edit-rep').value = t.rep_name || "";
         document.getElementById('edit-tel').value = t.tel || "";
         document.getElementById('edit-addr').value = t.address || "";
+        
+        // チップ描画
+        const chipArea = document.getElementById('edit-chip-area');
+        chipArea.innerHTML = "";
+        quickChips.forEach(c => {
+            const sp = document.createElement('span'); sp.className='chip'; sp.innerText=c;
+            sp.onclick = () => addNote(c);
+            chipArea.appendChild(sp);
+        });
+
         document.getElementById('editModal').style.display = 'flex';
     }
     function closeModal() { document.getElementById('editModal').style.display='none'; }
