@@ -6,7 +6,7 @@
     <title>顧客リスト</title>
     
     <style>
-        /* --- デザイン定義（白ベース×赤アクセント） --- */
+        /* --- デザイン定義 --- */
         :root {
             --bg: #F5F5F7;
             --card: #FFFFFF;
@@ -128,6 +128,7 @@
         .circle-btn:active { transform: scale(0.95); background: #f9f9f9; }
         .circle-btn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; }
         .circle-btn.red-icon svg { stroke: var(--accent-red); }
+        /* ピンの中身を塗りつぶし */
         .circle-btn.pin svg { fill: var(--accent-red); stroke: none; }
 
         /* マップ */
@@ -175,7 +176,7 @@
         #map-placeholder-msg {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
             background: rgba(255,255,255,0.95); padding: 20px; border-radius: 12px;
-            font-weight: 600; color: #d32f2f; pointer-events: auto;
+            font-weight: 600; color: #333; pointer-events: auto;
             text-align: center; width: 80%; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             font-size: 0.9rem; line-height: 1.6;
         }
@@ -351,7 +352,7 @@
     let targetReps = []; 
     let quickChips = ["不在", "移転", "商談中", "完了"];
     let db = [];
-    let map, geocoder, AdvancedMarkerElement;
+    let map, geocoder;
     let markers = [];
     let watchId = null;
     let isTrackingLocked = false;
@@ -384,14 +385,17 @@
         }
     };
 
-    // ★修正: 動作確認済みのAdvancedMarkerElementとmarkerライブラリを読み込む構成に戻しました
+    // ★修正: 最も互換性が高い「標準マーカー」方式を採用
+    // AdvancedMarkerElementはAPIキーやMapIDの設定によってはエラーになるため、
+    // ここではあえて google.maps.Marker を使い、スタイルで色を変更する方式にします。
     async function initSystem(key) {
         if(window.google && window.google.maps && map) return;
         
         if(!document.querySelector('script[src*="maps.googleapis.com"]')) {
             await new Promise((resolve) => {
                 const s = document.createElement('script');
-                s.src = `https://maps.googleapis.com/maps/api/js?key=${key}&loading=async&libraries=places,geocoding,geometry,marker`;
+                // callbackなしでロード完了をPromiseで待つ方式
+                s.src = `https://maps.googleapis.com/maps/api/js?key=${key}&libraries=places,geocoding`;
                 s.async = true;
                 s.onload = resolve;
                 s.onerror = () => {
@@ -402,14 +406,14 @@
         }
 
         try {
+            // ライブラリロード待ちをせず、グローバルオブジェクトから直接生成
+            // (callbackパラメータを使わないモダンな書き方に対応)
             const { Map } = await google.maps.importLibrary("maps"); 
             const { Geocoder } = await google.maps.importLibrary("geocoding");
-            const { AdvancedMarkerElement: AM } = await google.maps.importLibrary("marker");
             geocoder = new Geocoder(); 
-            AdvancedMarkerElement = AM;
             
             map = new Map(document.getElementById('google-map-view'), { 
-                center:{lat:35.68, lng:139.76}, zoom:13, mapId: "DEMO_MAP_ID",
+                center:{lat:35.68, lng:139.76}, zoom:13,
                 mapTypeControl: false, streetViewControl: false 
             });
             
@@ -420,8 +424,19 @@
             if(db.length > 0) render(); 
         } catch(e) { 
             console.error(e);
-            document.getElementById('map-placeholder-msg').innerHTML = 
-                `地図の読み込みに失敗しました。<br>エラー詳細: ${e.message}`;
+            // importLibraryが使えない環境（古いAPIキー設定など）のためのフォールバック
+            try {
+                geocoder = new google.maps.Geocoder();
+                map = new google.maps.Map(document.getElementById('google-map-view'), { 
+                    center:{lat:35.68, lng:139.76}, zoom:13,
+                    mapTypeControl: false, streetViewControl: false 
+                });
+                document.getElementById('map-placeholder-msg').style.display='none';
+                if(db.length > 0) render();
+            } catch(e2) {
+                document.getElementById('map-placeholder-msg').innerHTML = 
+                    `地図の読み込みに失敗しました。<br>エラー詳細: ${e.message}`;
+            }
         }
     }
 
@@ -508,26 +523,33 @@
     }
 
     function updateMapPins(targets) {
-        if(!map || !AdvancedMarkerElement) return;
+        if(!map) return;
         markers.forEach(m => m.setMap(null)); markers = [];
         
         targets.forEach(c => {
             if(!c.lat || !c.lng) return;
             const isMe = targetReps.includes(c.rep_name);
+            const color = isMe ? "#2196F3" : "#D32F2F"; 
             
-            const pinView = document.createElement("div");
-            pinView.style.width = "14px";
-            pinView.style.height = "14px";
-            pinView.style.backgroundColor = isMe ? "#2196F3" : "#cc3300";
-            pinView.style.border = "2px solid white";
-            pinView.style.borderRadius = "50%";
-            pinView.style.boxShadow = "0 2px 4px rgba(0,0,0,0.3)";
-
-            const m = new AdvancedMarkerElement({ position: {lat:c.lat, lng:c.lng}, map: map, content: pinView, title: c.name });
-            m.addListener("click", () => {
-                new google.maps.InfoWindow({ content: `<b>${c.name}</b><br>${c.building||""}` }).open(map, m);
+            // ★標準マーカーで色指定（SVG）
+            const marker = new google.maps.Marker({
+                position: {lat:c.lat, lng:c.lng},
+                map: map,
+                title: c.name,
+                icon: {
+                    path: google.maps.SymbolPath.CIRCLE,
+                    scale: 7,
+                    fillColor: color,
+                    fillOpacity: 1,
+                    strokeColor: "white",
+                    strokeWeight: 2
+                }
             });
-            markers.push(m);
+            
+            const infoContent = `<div style="font-weight:bold; color:#333;">${c.name}</div><div style="font-size:0.85rem;">${c.building||""}</div>`;
+            const infowindow = new google.maps.InfoWindow({ content: infoContent });
+            marker.addListener("click", () => infowindow.open(map, marker));
+            markers.push(marker);
         });
     }
 
@@ -582,8 +604,15 @@
                 const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
                 if (myLocationMarker) { myLocationMarker.position = loc; } 
                 else {
-                    const pin = document.createElement("div"); pin.style.width="18px"; pin.style.height="18px"; pin.style.backgroundColor="#4285F4"; pin.style.border="3px solid white"; pin.style.borderRadius="50%";
-                    myLocationMarker = new AdvancedMarkerElement({ map: map, position: loc, content: pin, title: "現在地", zIndex: 999 });
+                    const pin = {
+                        path: google.maps.SymbolPath.CIRCLE,
+                        scale: 8,
+                        fillColor: "#4285F4",
+                        fillOpacity: 1,
+                        strokeColor: "white",
+                        strokeWeight: 2
+                    };
+                    myLocationMarker = new google.maps.Marker({ map: map, position: loc, icon: pin, zIndex: 999 });
                 }
                 if (isTrackingLocked) map.panTo(loc);
                 if (mapSyncMode) resetAndRender();
