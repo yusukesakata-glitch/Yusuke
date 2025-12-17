@@ -8,39 +8,27 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 
     <style>
-        /* --- デザイン定義（スクリーンショットを元に調整） --- */
+        /* --- デザイン定義 --- */
         :root {
-            --bg: #F2F2F2;          /* 全体背景：薄いグレー */
-            --card: #FFFFFF;        /* カード背景：白 */
+            --bg: #F5F5F7;          /* 背景：薄いグレー */
+            --card: #FFFFFF;        /* カード：白 */
             --text-main: #333333;   /* 文字：濃いグレー */
             --text-sub: #666666;    /* サブ文字：グレー */
-            --accent-red: #C84646;  /* 画像のアイコンに近い、少し落ち着いた赤 */
-            --tag-bg: #EFEBE4;      /* 画像のIDタグのベージュ色 */
-            --tag-text: #6D6355;    /* タグの文字色 */
-            --border: #EAEAEA;      /* 薄い境界線 */
-            
-            --radius: 4px;          /* 画像に合わせて角丸は控えめに */
-            --font-base: 'Noto Sans JP', sans-serif;
+            --accent-red: #D32F2F;  /* アクセント：赤 */
+            --tag-bg: #EFEBE4;      /* タグ背景：ベージュ */
+            --tag-text: #5D5548;    /* タグ文字：茶グレー */
+            --shadow: 0 2px 8px rgba(0,0,0,0.05);
+            --radius: 8px;
         }
 
         body {
-            font-family: var(--font-base);
+            font-family: 'Noto Sans JP', sans-serif;
             background-color: var(--bg);
             color: var(--text-main);
             margin: 0; padding: 0;
             height: 100vh; overflow-y: auto;
             -webkit-tap-highlight-color: transparent;
         }
-
-        /* SVGアイコン用スタイル */
-        .svg-icon {
-            width: 16px; height: 16px;
-            fill: currentColor;
-            vertical-align: text-bottom;
-            flex-shrink: 0;
-        }
-        .svg-icon-red { color: var(--accent-red); }
-        .svg-icon-build { color: #d4a373; /* ビルのアイコン色（ベージュオレンジ系） */ }
 
         /* レイアウト構造 */
         .app-container { display: flex; flex-direction: column; height: 100%; max-width: 1600px; margin: 0 auto; padding: 15px; box-sizing: border-box; gap: 15px; }
@@ -50,135 +38,117 @@
             .app-container { flex-direction: row; padding: 20px; }
             .left-section { flex: 2; display: flex; flex-direction: column; gap: 10px; height: 100%; }
             .right-section { flex: 1; display: flex; flex-direction: column; height: 100%; min-width: 420px; overflow-y: auto; padding-right: 5px; }
-            .map-wrapper { flex: 1; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: relative; }
+            .map-wrapper { flex: 1; border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); position: relative; }
         }
         @media (max-width: 899px) {
             .app-container { display: block; padding: 10px; }
-            .map-wrapper { height: 50vh; min-height: 350px; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: relative; margin-bottom: 15px; }
+            .map-wrapper { height: 50vh; min-height: 350px; border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); position: relative; margin-bottom: 15px; }
             .right-section { padding-bottom: 100px; }
         }
 
         /* ヘッダー */
         .header-area { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        h1 { font-size: 1.2rem; font-weight: 700; margin: 0; color: var(--text-main); }
-        
-        .btn-settings {
-            background: #fff; border: 1px solid #ccc;
-            padding: 6px 12px; border-radius: 20px;
-            font-size: 0.8rem; cursor: pointer; color: #555;
-            display: flex; align-items: center; gap: 4px;
-        }
+        h1 { font-size: 1.2rem; font-weight: 700; margin: 0; }
+        .btn-settings { background: #fff; border: 1px solid #ccc; padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; cursor: pointer; }
 
         /* 検索・フィルタ */
         .filter-area { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
-        select { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ddd; background: #fff; font-size: 0.85rem; appearance: none; }
+        select { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ddd; background: #fff; }
         .list-search-box { position: relative; margin-bottom: 15px; }
-        .list-search-box input { width: 100%; padding: 12px 12px 12px 40px; border-radius: 8px; border: 1px solid #ddd; background: #fff; font-size: 0.95rem; box-sizing: border-box; }
-        .list-search-icon { position: absolute; left: 12px; top: 12px; color: #aaa; }
+        .list-search-box input { width: 100%; padding: 10px 10px 10px 35px; border-radius: 6px; border: 1px solid #ddd; box-sizing: border-box; }
+        .list-search-icon { position: absolute; left: 10px; top: 10px; color: #aaa; }
 
-        /* --- リストカード（画像のデザインを再現） --- */
+        /* --- リストカード (指定のデザイン・並び順) --- */
         .customer-item { 
-            background: var(--card); 
-            padding: 20px; 
-            border-radius: var(--radius); /* 角丸控えめ */
-            margin-bottom: 12px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; /* 縦中央揃え */
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05); /* 影は薄く */
-            border: 1px solid #f0f0f0;
+            background: var(--card); padding: 20px; border-radius: var(--radius); 
+            margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;
+            box-shadow: var(--shadow); border: 1px solid #eee;
         }
 
-        .info-col-left { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+        .info-col-left { flex: 1; display: flex; flex-direction: column; gap: 6px; }
 
-        /* ① タイトル行（赤いドット付き） */
+        /* 1. タイトル (赤丸付き) */
         .info-main { 
-            font-size: 1rem; font-weight: 700; color: var(--text-main); 
-            display: flex; align-items: flex-start; line-height: 1.5;
+            font-size: 1rem; font-weight: 700; display: flex; align-items: flex-start; line-height: 1.4; 
         }
         .info-main::before {
-            content: ''; display: inline-block; flex-shrink: 0;
-            width: 6px; height: 6px; background: var(--accent-red);
-            border-radius: 50%; margin-right: 10px; margin-top: 8px; /* 位置調整 */
+            content: ''; display: inline-block; width: 8px; height: 8px; 
+            background: var(--accent-red); border-radius: 50%; 
+            margin-right: 10px; margin-top: 6px; flex-shrink: 0;
         }
 
-        /* ② IDタグと担当者 */
-        .info-meta-row { display: flex; align-items: center; gap: 12px; margin-left: 16px; /* ドット分インデント */ }
+        /* 2. Rコード + 担当者 */
+        .info-meta-row { display: flex; align-items: center; gap: 10px; margin-left: 18px; }
         .tag-id { 
-            background: var(--tag-bg); color: var(--tag-text); 
-            padding: 3px 10px; border-radius: 2px; /* 角丸ほぼなし */
-            font-size: 0.7rem; font-weight: 500; letter-spacing: 0.05em;
-            font-family: monospace; /* コードっぽく */
+            background: var(--tag-bg); color: var(--tag-text); padding: 2px 8px; 
+            border-radius: 2px; font-size: 0.75rem; font-weight: 500; font-family: monospace;
         }
-        .text-rep { font-size: 0.85rem; color: var(--text-main); font-weight: 500; }
+        .text-rep { font-size: 0.85rem; font-weight: 500; }
 
-        /* ③ 電話番号行 */
-        .info-tel-row { display: flex; align-items: center; gap: 8px; margin-left: 16px; }
-        .tel-number { font-size: 0.95rem; color: var(--text-main); letter-spacing: 0.05em; font-family: 'Roboto', sans-serif; }
-        .btn-copy-box {
-            font-size: 0.6rem; border: 1px solid #ddd; background: #fff;
-            padding: 2px 6px; border-radius: 2px; color: #999; cursor: pointer;
-            letter-spacing: 0.05em;
+        /* 3 & 4. 住所 & ビル名 */
+        .info-address, .info-building { 
+            font-size: 0.85rem; color: var(--text-main); margin-left: 18px; line-height: 1.4;
+            display: flex; align-items: flex-start; gap: 6px;
+        }
+        .info-building { font-weight: 700; margin-top: 2px; } /* ビル名は太字 */
+        
+        /* 5. 電話番号 */
+        .info-tel-row { display: flex; align-items: center; gap: 8px; margin-left: 18px; margin-top: 2px; }
+        .tel-number { font-size: 0.95rem; font-weight: 500; letter-spacing: 0.05em; }
+        .btn-copy-sm { 
+            font-size: 0.6rem; padding: 1px 5px; border: 1px solid #ccc; 
+            border-radius: 2px; background: #fff; color: #666; cursor: pointer; 
         }
 
-        /* ④ ビル・住所行 */
-        .info-addr-box { display: flex; flex-direction: column; gap: 2px; margin-left: 16px; }
-        .info-building { 
-            font-weight: 700; font-size: 0.85rem; color: var(--text-main); 
-            display: flex; align-items: center; gap: 6px; 
-        }
-        .info-address { font-size: 0.8rem; color: var(--text-sub); line-height: 1.4; margin-top: 2px;}
+        /* SVGアイコン */
+        .svg-icon { width: 16px; height: 16px; fill: currentColor; flex-shrink: 0; margin-top: 2px; }
+        .icon-red { color: var(--accent-red); }
+        .icon-build { color: #d4a373; }
 
-        /* --- 右側のボタンエリア（縦並び・白丸） --- */
+        /* 右側のボタン群 (縦並び) */
         .action-col-right { 
-            display: flex; flex-direction: column; gap: 10px; 
-            margin-left: 15px; padding-left: 15px;
+            display: flex; flex-direction: column; gap: 10px; margin-left: 10px; padding-left: 10px; border-left: 1px solid #f0f0f0;
         }
-        
         .circle-btn {
-            width: 40px; height: 40px; border-radius: 50%;
-            background: #fff; border: 1px solid #eee;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; text-decoration: none;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
-            transition: 0.2s;
+            width: 36px; height: 36px; border-radius: 50%; background: #fff; 
+            border: 1px solid #eee; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; color: var(--text-main); transition: 0.2s;
         }
-        .circle-btn:active { transform: scale(0.95); background: #f9f9f9; }
-        /* アイコンの色：画像に合わせて少し暗めの赤 */
-        .circle-btn svg { width: 18px; height: 18px; fill: none; stroke: var(--accent-red); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-        /* ピンアイコンの中身を赤く塗りつぶす場合 */
+        .circle-btn:hover { background: #f9f9f9; border-color: var(--accent-red); }
+        .circle-btn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; }
+        .circle-btn.red-icon svg { stroke: var(--accent-red); }
         .circle-btn.pin svg { fill: var(--accent-red); stroke: none; }
-        
-        /* 編集ボタン（小さく） */
-        .btn-edit-small {
-            text-align: center; font-size: 0.7rem; color: #ccc; 
-            background: none; border: none; cursor: pointer; margin-top: 5px;
-        }
 
-        /* --- その他 --- */
-        .place-search-box { display: flex; align-items: center; background: #fff; border-radius: 6px; padding: 5px; border: 1px solid #ddd; }
-        .place-search-input { border: none; flex: 1; padding: 8px; outline: none; }
-        .map-sync-wrapper { position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.9); padding: 5px 10px; border-radius: 20px; z-index: 10; display:flex; align-items:center; gap:5px; font-size:0.75rem;}
+        /* マップ関連 */
+        .place-search-box { display: flex; margin-bottom: 10px; }
+        .place-search-input { flex:1; padding:10px; border:1px solid #ccc; border-radius:4px 0 0 4px; }
+        .place-search-btn { padding:0 15px; border:1px solid #ccc; border-left:none; background:#fff; border-radius:0 4px 4px 0; cursor:pointer; }
         
-        #stats-area { background: #fff; padding: 15px; border-radius: 8px; margin-bottom: 15px; border:1px solid #eee; }
-        .stats-grid { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
-        .stats-item { background: #f0f0f0; padding: 4px 10px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; }
-        .stats-item.selected { background: var(--accent-red); color: white; }
-
-        .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:none; justify-content:center; align-items:center; z-index:9999; }
-        .modal-content { background:#fff; padding:25px; border-radius:12px; width:90%; max-width:500px; max-height:85vh; overflow-y:auto; }
-        
-        .toggle-switch { position: relative; display: inline-block; width: 34px; height: 20px; }
+        .map-sync-wrapper { position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.9); padding: 5px 10px; border-radius: 20px; z-index: 10; display: flex; align-items: center; gap: 5px; font-size: 0.75rem; font-weight: bold; }
+        .toggle-switch { position: relative; display: inline-block; width: 30px; height: 18px; }
         .toggle-switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
-        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 50%; }
+        .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 50%; }
         input:checked + .slider { background-color: var(--accent-red); }
-        input:checked + .slider:before { transform: translateX(14px); }
+        input:checked + .slider:before { transform: translateX(12px); }
 
-        .settings-section { margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 20px; }
-        .btn-main { width: 100%; padding: 12px; background: #333; color: #fff; border: none; border-radius: 6px; cursor: pointer; }
-        .btn-sub { padding: 8px 12px; background: #f0f0f0; border: none; border-radius: 6px; cursor: pointer; }
+        #gpsBtn { position: absolute; bottom: 20px; right: 10px; width: 40px; height: 40px; border-radius: 50%; background: #fff; border: none; box-shadow: 0 2px 6px rgba(0,0,0,0.2); cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; z-index: 10; }
 
+        /* モーダル */
+        .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:none; justify-content:center; align-items:center; z-index:9999; }
+        .modal-content { background:#fff; padding:25px; border-radius:12px; width:90%; max-width:500px; max-height:85vh; overflow-y:auto; }
+        .settings-section { margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #eee; }
+        .btn-main { width: 100%; padding: 12px; background: #333; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .btn-sub { padding: 8px 12px; background: #eee; border: none; border-radius: 6px; cursor: pointer; }
+        .btn-del { width: 100%; padding: 10px; background: #fff0f0; color: red; border: none; border-radius: 6px; cursor: pointer; margin-top: 10px; }
+
+        /* 統計 */
+        #stats-area { background: #fff; padding: 10px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #eee; }
+        .stats-grid { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px; }
+        .stats-item { background: #f0f0f0; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; }
+        .stats-item.selected { background: var(--accent-red); color: white; }
+
+        #load-more-btn { width: 100%; padding: 10px; background: #fff; border: 1px solid #ccc; border-radius: 20px; cursor: pointer; margin-top: 10px; display: none; }
     </style>
 </head>
 <body>
@@ -186,13 +156,12 @@
 <div class="app-container">
     <div class="left-section">
         <div class="place-search-box">
-            <input type="text" id="mapJumpInput" class="place-search-input" placeholder="地名で移動 (例: 横浜)" onkeydown="if(event.key==='Enter')searchMapLocation()">
-            <button onclick="searchMapLocation()" style="background:none;border:none;cursor:pointer;">🔍</button>
+            <input type="text" id="mapJumpInput" class="place-search-input" placeholder="地名で移動 (例: 銀座)" onkeydown="if(event.key==='Enter')searchMapLocation()">
+            <button class="place-search-btn" onclick="searchMapLocation()">🔍</button>
         </div>
-
         <div class="map-wrapper">
             <div id="google-map-view" style="width:100%; height:100%;"></div>
-            <div id="map-placeholder-msg">地図を準備中...</div>
+            <div id="map-placeholder-msg" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); pointer-events:none;">地図を準備中...</div>
             <div class="map-sync-wrapper">
                 <span>連動</span>
                 <label class="toggle-switch">
@@ -200,7 +169,7 @@
                     <span class="slider"></span>
                 </label>
             </div>
-            <button id="gpsBtn" onclick="toggleGPS()" style="position:absolute; bottom:20px; right:10px; width:40px; height:40px; border-radius:50%; background:#fff; border:none; box-shadow:0 2px 5px rgba(0,0,0,0.2); cursor:pointer; font-size:1.2rem; display:flex; align-items:center; justify-content:center;">◎</button>
+            <button id="gpsBtn" onclick="toggleGPS()">◎</button>
         </div>
     </div>
 
@@ -221,25 +190,25 @@
         </div>
 
         <div id="stats-area">
-            <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+            <div style="display:flex; justify-content:space-between;">
                 <span id="stats-total-text" style="font-weight:bold;">-- 件</span>
-                <select id="limitSelect" onchange="changeLimit()" style="width:auto; padding:2px;"><option value="100">100件</option><option value="ALL">全件</option></select>
+                <select id="limitSelect" onchange="changeLimit()" style="padding:2px;"><option value="100">100件</option><option value="ALL">全件</option></select>
             </div>
             <div class="stats-grid" id="stats-detail"></div>
         </div>
 
         <div id="result-area"></div>
-        <button id="load-more-btn" onclick="loadMore()" style="width:100%; padding:10px; margin-top:10px; background:none; border:1px solid #ccc; border-radius:20px; cursor:pointer; display:none;">さらに表示</button>
-        <div style="height:50px;"></div>
+        <button id="load-more-btn" onclick="loadMore()">さらに表示</button>
+        <div style="height:60px;"></div>
     </div>
 </div>
 
 <div id="settingsModal" class="modal-overlay">
     <div class="modal-content">
-        <h3 style="margin-top:0; text-align:center;">設定</h3>
+        <h3 style="text-align:center; margin-top:0;">設定メニュー</h3>
         
         <div class="settings-section">
-            <label style="font-weight:bold; display:block; margin-bottom:5px;">APIキー設定</label>
+            <label style="font-weight:bold; display:block; margin-bottom:5px;">APIキー</label>
             <div style="display:flex; gap:5px;">
                 <input type="password" id="apiKey" placeholder="AIzaSy..." style="flex:1; padding:8px; border:1px solid #ddd; border-radius:4px;">
                 <button onclick="saveKeyAndInit()" class="btn-sub">保存</button>
@@ -249,22 +218,25 @@
         <div class="settings-section">
             <label style="font-weight:bold; display:block; margin-bottom:5px;">📥 データ登録・更新</label>
             <div style="background:#f9f9f9; padding:10px; border-radius:6px;">
-                <div style="display:flex; gap:15px; margin-bottom:10px;">
-                    <label style="cursor:pointer; font-size:0.85rem;"><input type="radio" name="regMode" value="new" checked onchange="changeRegMode()"> 新規登録(6列)</label>
-                    <label style="cursor:pointer; font-size:0.85rem;"><input type="radio" name="regMode" value="update" onchange="changeRegMode()"> ビル名更新(2列)</label>
+                <div style="display:flex; gap:10px; margin-bottom:10px;">
+                    <label style="cursor:pointer; font-size:0.9rem;"><input type="radio" name="regMode" value="new" checked onchange="changeRegMode()"> 新規登録(6列)</label>
+                    <label style="cursor:pointer; font-size:0.9rem;"><input type="radio" name="regMode" value="update" onchange="changeRegMode()"> ビル名更新(2列)</label>
                 </div>
+                
                 <div id="mode-new-area" style="margin-bottom:5px;">
                     <input type="text" id="repName" placeholder="担当者名 (例: 佐藤)" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px; box-sizing:border-box;">
                 </div>
-                <textarea id="csvInput" placeholder="Rコード | 法人名 | 店舗名 | ビル名 | 住所 | 電話" style="width:100%; height:100px; padding:8px; border:1px solid #ddd; border-radius:4px; box-sizing:border-box;"></textarea>
-                <button onclick="processData()" class="btn-main" style="margin-top:10px;">実行</button>
+                
+                <textarea id="csvInput" placeholder="Rコード | 法人名 | 店舗名 | ビル名 | 住所 | 電話" style="width:100%; height:100px; padding:8px; border:1px solid #ddd; border-radius:4px; box-sizing:border-box; margin-bottom:5px;"></textarea>
+                <button onclick="processData()" id="runBtn" class="btn-main">実行</button>
+                
                 <div style="margin-top:10px; display:flex; gap:5px;">
                     <button class="btn-sub" onclick="shareOrDownload()">保存(JSON)</button>
                     <button class="btn-sub" onclick="document.getElementById('fileInput').click()">読込(JSON)</button>
                     <input type="file" id="fileInput" accept=".json" style="display:none" onchange="uploadData(this)">
                     <button class="btn-sub" onclick="clearAll()" style="color:red; margin-left:auto;">全削除</button>
                 </div>
-                <div id="log-area" style="font-size:0.7rem; color:#888; margin-top:5px;"></div>
+                <div id="log-area" style="font-size:0.75rem; color:#666; margin-top:5px;"></div>
             </div>
         </div>
 
@@ -281,20 +253,24 @@
     <div class="modal-content">
         <h3>情報編集</h3>
         <input type="hidden" id="edit-id">
-        <label style="display:block; font-size:0.8rem; color:#888;">備考</label>
-        <textarea id="edit-note" style="width:100%; height:60px; padding:8px; border:1px solid #ddd; border-radius:4px; margin-bottom:10px;"></textarea>
         
-        <label style="display:block; font-size:0.8rem; color:#888;">ビル名</label>
-        <input type="text" id="edit-building" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px; margin-bottom:10px;">
+        <label style="display:block; font-size:0.8rem; color:#666;">備考</label>
+        <textarea id="edit-note" style="width:100%; height:60px; padding:8px; border:1px solid #ddd; border-radius:4px; box-sizing:border-box; margin-bottom:10px;"></textarea>
         
-        <label style="display:block; font-size:0.8rem; color:#888;">担当者</label>
-        <input type="text" id="edit-rep" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px; margin-bottom:10px;">
+        <label style="display:block; font-size:0.8rem; color:#666;">ビル名</label>
+        <input type="text" id="edit-building" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px; box-sizing:border-box; margin-bottom:10px;">
         
-        <div style="display:flex; gap:10px; margin-top:15px;">
+        <label style="display:block; font-size:0.8rem; color:#666;">担当者</label>
+        <input type="text" id="edit-rep" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px; box-sizing:border-box; margin-bottom:10px;">
+        
+        <label style="display:block; font-size:0.8rem; color:#666;">電話番号</label>
+        <input type="text" id="edit-tel" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px; box-sizing:border-box; margin-bottom:10px;">
+
+        <div style="display:flex; gap:10px; margin-top:20px;">
             <button class="btn-sub" style="flex:1;" onclick="closeModal()">キャンセル</button>
             <button class="btn-main" style="flex:1;" onclick="saveEdit()">保存</button>
         </div>
-        <button onclick="deleteCustomer()" style="width:100%; margin-top:15px; background:none; border:none; color:red; cursor:pointer;">削除</button>
+        <button onclick="deleteCustomer()" class="btn-del">削除</button>
     </div>
 </div>
 
@@ -324,7 +300,6 @@
         } else {
             document.getElementById('map-placeholder-msg').innerText = "設定からAPIキーを入力してください";
         }
-        updateStats();
     };
 
     // --- Google Maps API ---
@@ -348,7 +323,7 @@
             geocoder = new Geocoder(); AdvancedMarkerElement = AM;
             
             map = new Map(document.getElementById('google-map-view'), { 
-                center:{lat:35.45, lng:139.63}, zoom:13, mapId: "DEMO_MAP_ID", 
+                center:{lat:35.68, lng:139.76}, zoom:13, mapId: "DEMO_MAP_ID", 
                 mapTypeControl: false, streetViewControl: false 
             });
             
@@ -358,7 +333,7 @@
         } catch(e) { console.error(e); }
     }
 
-    // --- レンダリング (画像デザイン完全再現版) ---
+    // --- レンダリング (画像のデザインを再現) ---
     function render() {
         const area = document.getElementById('result-area'); area.innerHTML = "";
         const fPref = document.getElementById('prefFilter').value;
@@ -383,54 +358,65 @@
             const div = document.createElement('div');
             div.className = 'customer-item';
             
-            // ビル名表示（SVGアイコン付き）
+            // ビル名 (SVGアイコン付き)
             const buildDisplay = c.building ? 
                 `<div class="info-building">
-                    <svg class="svg-icon svg-icon-build" viewBox="0 0 24 24"><path fill="currentColor" d="M10 2v18H4V6H2v16h14v-2h2v2h2V8h-2v2h-2v-2h-2V2h-4zm2 2h2v2h-2V4zM6 8h2v2H6V8zm0 4h2v2H6v-2zm8 0h2v2h-2v-2zm-8 4h2v2H6v-2zm8 0h2v2h-2v-2z"/></svg>
+                    <svg class="svg-icon icon-build" viewBox="0 0 24 24"><path d="M10 2v18H4V6H2v16h14v-2h2v2h2V8h-2v2h-2v-2h-2V2h-4zm2 2h2v2h-2V4zM6 8h2v2H6V8zm0 4h2v2H6v-2zm8 0h2v2h-2v-2zm-8 4h2v2H6v-2zm8 0h2v2h-2v-2z"/></svg>
                     ${c.building}
                  </div>` : "";
             
-            // 電話番号表示（SVGアイコン付き）
+            // 電話番号 (SVGアイコン付き)
             const telDisplay = c.tel ? 
                 `<div class="info-tel-row">
-                    <svg class="svg-icon svg-icon-red" viewBox="0 0 24 24"><path fill="currentColor" d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 1.25 1.25 1.45 2.45 1.83 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+                    <svg class="svg-icon icon-red" viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 1.25 1.25 1.45 2.45 1.83 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
                     <span class="tel-number">${c.tel}</span>
-                    <button class="btn-copy-box" onclick="copyToClipboard('${c.tel}')">COPY</button>
+                    <button class="btn-copy-sm" onclick="copyToClipboard('${c.tel}')">COPY</button>
                  </div>` : "";
 
             div.innerHTML = `
                 <div class="info-col-left">
                     <div class="info-main">${c.name}</div>
-                    
                     <div class="info-meta-row">
                         <span class="tag-id">${c.r_code || "NO-ID"}</span>
                         <span class="text-rep">${c.rep_name || "担当なし"}</span>
                     </div>
-
+                    <div class="info-address">${c.address}</div>
+                    ${buildDisplay}
                     ${telDisplay}
-
-                    <div class="info-addr-box">
-                        ${buildDisplay}
-                        <div class="info-address">${c.address}</div>
-                    </div>
-                    
-                    ${c.note ? `<div style="margin-left:16px; font-size:0.75rem; color:#d4af37;">📝 ${c.note}</div>` : ''}
+                    ${c.note ? `<div style="margin-left:18px; font-size:0.75rem; color:#D32F2F; margin-top:4px;">📝 ${c.note}</div>` : ''}
                 </div>
 
                 <div class="action-col-right">
-                    <a href="tel:${c.tel}" class="circle-btn">
+                    <a href="tel:${c.tel}" class="circle-btn red-icon">
                         <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
                     </a>
                     <button onclick="panToMap(${c.lat},${c.lng})" class="circle-btn pin">
                         <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3" fill="#fff"></circle></svg>
                     </button>
-                    <button onclick="openEdit('${c.id}')" class="btn-edit-small">編集</button>
+                    <button onclick="openEdit('${c.id}')" class="circle-btn">
+                        <svg viewBox="0 0 24 24"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+                    </button>
                 </div>
             `;
             area.appendChild(div);
         });
 
-        updateRepStats(filtered);
+        // 統計更新
+        const counts = {};
+        filtered.forEach(d => counts[d.rep_name||"不明"] = (counts[d.rep_name||"不明"]||0)+1);
+        const statsArea = document.getElementById('stats-detail'); statsArea.innerHTML="";
+        Object.keys(counts).forEach(k => {
+            const sp = document.createElement('span');
+            sp.className = `stats-item ${activeReps.has(k)?'selected':''}`;
+            sp.innerText = `${k}: ${counts[k]}`;
+            sp.onclick = () => {
+                if(activeReps.has(k)) activeReps.delete(k); else activeReps.add(k);
+                render();
+            };
+            statsArea.appendChild(sp);
+        });
+        document.getElementById('stats-total-text').innerText = `${filtered.length}件`;
+        document.getElementById('load-more-btn').style.display = (filtered.length > currentLimit) ? 'block' : 'none';
     }
 
     function updateMapPins(targets) {
@@ -440,7 +426,7 @@
         targets.forEach(c => {
             if(!c.lat || !c.lng) return;
             const isMe = targetReps.includes(c.rep_name);
-            const pinColor = isMe ? "#2196F3" : "#C84646"; // 赤ピンも画像の色に合わせる
+            const pinColor = isMe ? "#2196F3" : "#D32F2F"; 
             
             const pinView = document.createElement("div");
             pinView.style.width = "14px";
@@ -450,40 +436,50 @@
             pinView.style.borderRadius = "50%";
             pinView.style.boxShadow = "0 2px 4px rgba(0,0,0,0.3)";
 
-            const m = new AdvancedMarkerElement({
-                position: {lat:c.lat, lng:c.lng},
-                map: map,
-                content: pinView,
-                title: c.name
-            });
+            const m = new AdvancedMarkerElement({ position: {lat:c.lat, lng:c.lng}, map: map, content: pinView });
             m.addListener("click", () => {
-                new google.maps.InfoWindow({
-                    content: `<div style="font-weight:bold;">${c.name}</div><div>${c.building||""}</div>`
-                }).open(map, m);
+                new google.maps.InfoWindow({ content: `<b>${c.name}</b><br>${c.building||""}` }).open(map, m);
             });
             markers.push(m);
         });
     }
 
-    // --- ユーティリティ & イベント ---
+    // --- その他機能 ---
     function copyToClipboard(text) { navigator.clipboard.writeText(text).then(() => alert("コピーしました")); }
     function normalize(s) { return (s||"").replace(/[Ａ-Ｚａ-ｚ０-９]/g, c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0)).toLowerCase().replace(/\s+/g,""); }
     function getPrefecture(a) { const m=a.match(/(...??[都道府県])/); return m?m[1]:"その他"; }
     function resetAndRender() { render(); }
     function toggleMapSync() { mapSyncMode = document.getElementById('mapSyncToggle').checked; render(); }
-    function updateStats() { document.getElementById('stats-total-text').innerText = `${db.length}件`; }
     function changeLimit() { currentLimit = document.getElementById('limitSelect').value === 'ALL' ? db.length : parseInt(document.getElementById('limitSelect').value); render(); }
     function loadMore() { currentLimit += 100; render(); }
 
     function panToMap(lat, lng) {
         map.setZoom(17); map.panTo({lat, lng});
-        if(!document.getElementById('mapSyncToggle').checked) {
-            document.getElementById('mapSyncToggle').click(); 
-        }
+        if(!document.getElementById('mapSyncToggle').checked) document.getElementById('mapSyncToggle').click(); 
         if(window.innerWidth < 900) window.scrollTo({top:0, behavior:'smooth'});
     }
 
-    // --- 設定・データ処理 ---
+    function searchMapLocation() {
+        const input = document.getElementById('mapJumpInput').value;
+        if(!input || !geocoder) return;
+        geocoder.geocode({ address: input }, (results, status) => {
+            if (status === 'OK') { map.setCenter(results[0].geometry.location); map.setZoom(14); if(mapSyncMode) render(); }
+        });
+    }
+
+    function toggleGPS() {
+        if (!navigator.geolocation) return alert("位置情報が使えません");
+        if (watchId) { navigator.geolocation.clearWatch(watchId); watchId = null; alert("追跡停止"); } 
+        else {
+            watchId = navigator.geolocation.watchPosition((pos) => {
+                const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+                map.panTo(loc);
+                new AdvancedMarkerElement({ map:map, position:loc, content:document.createElement("div") }); // 簡易現在地ピン
+            }, null, {enableHighAccuracy:true});
+            alert("追跡開始");
+        }
+    }
+
     function openSettings() {
         document.getElementById('settingsModal').style.display='flex';
         renderRepChecklist();
@@ -523,7 +519,9 @@
     async function processData() {
         const mode = document.querySelector('input[name="regMode"]:checked').value;
         const csv = document.getElementById('csvInput').value.trim();
+        const btn = document.getElementById('runBtn');
         if(!csv) return;
+        btn.disabled = true; btn.innerText = "処理中...";
 
         if(mode === 'update') {
             const lines = csv.split('\n');
@@ -544,7 +542,6 @@
                 if(c.length < 5) continue;
                 let r=c[0], name=(c[1]+" "+c[2]).trim(), b=c[3], a=c[4], t=c[5]||"";
                 if(c.length === 5) { b=""; a=c[3]; t=c[4]||""; }
-                
                 try {
                     const geo = await getGeo(a);
                     db.push({
@@ -553,11 +550,13 @@
                         lat: geo.lat, lng: geo.lng, rep_name: rep
                     });
                     cnt++;
+                    document.getElementById('log-area').innerText = `${cnt}件 処理済`;
                 } catch(e){}
-                await new Promise(r=>setTimeout(r, 300));
+                await new Promise(r=>setTimeout(r, 400));
             }
-            saveDB(); render(); alert(`${cnt}件 登録完了`);
+            saveDB(); populateFilters(); render(); alert(`${cnt}件 登録完了`);
         }
+        btn.disabled = false; btn.innerText = "実行";
     }
 
     function getGeo(addr) {
@@ -573,26 +572,8 @@
     function saveDB() { localStorage.setItem(DB_NAME, JSON.stringify(db)); }
     function clearAll() { if(confirm("全削除しますか？")) { localStorage.removeItem(DB_NAME); location.reload(); } }
     
-    function updateRepStats(filtered) {
-        const counts = {};
-        filtered.forEach(d => counts[d.rep_name||"不明"] = (counts[d.rep_name||"不明"]||0)+1);
-        const area = document.getElementById('stats-detail'); area.innerHTML="";
-        Object.keys(counts).forEach(k => {
-            const sp = document.createElement('span');
-            sp.className = 'stats-item';
-            sp.innerText = `${k}: ${counts[k]}`;
-            area.appendChild(sp);
-        });
-        document.getElementById('stats-total-text').innerText = `${filtered.length}件`;
-    }
-    
-    function populateFilters() {
-        const s = document.getElementById('prefFilter');
-        s.innerHTML = '<option value="ALL">全地域</option>';
-        [...new Set(db.map(d=>getPrefecture(d.address)))].sort().forEach(p => {
-            const o = document.createElement('option'); o.value=p; o.innerText=p; s.appendChild(o);
-        });
-    }
+    function shareOrDownload() { const blob = new Blob([JSON.stringify(db)], {type: 'application/json'}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `map_data.json`; a.click(); }
+    function uploadData(i) { const f=i.files[0]; if(!f)return; const r=new FileReader(); r.onload=e=>{try{if(confirm("読込しますか？")){db=JSON.parse(e.target.result);saveDB();populateFilters();render();alert("完了");}}catch(z){alert("失敗");}}; r.readAsText(f); }
 
     function openEdit(id) {
         const t = db.find(d => d.id === id);
@@ -601,6 +582,7 @@
         document.getElementById('edit-note').value = t.note || "";
         document.getElementById('edit-building').value = t.building || "";
         document.getElementById('edit-rep').value = t.rep_name || "";
+        document.getElementById('edit-tel').value = t.tel || "";
         document.getElementById('editModal').style.display = 'flex';
     }
     function closeModal() { document.getElementById('editModal').style.display='none'; }
@@ -611,6 +593,7 @@
             t.note = document.getElementById('edit-note').value;
             t.building = document.getElementById('edit-building').value;
             t.rep_name = document.getElementById('edit-rep').value;
+            t.tel = document.getElementById('edit-tel').value;
             saveDB(); render(); closeModal();
         }
     }
@@ -621,8 +604,6 @@
             saveDB(); render(); closeModal();
         }
     }
-    function shareOrDownload() { const blob = new Blob([JSON.stringify(db)], {type: 'application/json'}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `map_data.json`; a.click(); }
-    function uploadData(i) { const f=i.files[0]; if(!f)return; const r=new FileReader(); r.onload=e=>{try{if(confirm("読込しますか？")){db=JSON.parse(e.target.result);saveDB();populateFilters();resetAndRender();alert("完了");}}catch(z){alert("失敗");}}; r.readAsText(f); }
 </script>
 </body>
 </html>
