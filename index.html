@@ -349,7 +349,7 @@
         </div>
 
         <div class="filter-area">
-            <select id="prefFilter" onchange="resetAndRender()"><option value="ALL">PREFECTURE: ALL</option></select>
+            <select id="prefFilter" onchange="onPrefChange()"><option value="ALL">PREFECTURE: ALL</option></select>
             <select id="stationFilter" onchange="resetAndRender()"><option value="ALL">STATION: ALL</option></select>
         </div>
         
@@ -451,6 +451,9 @@
         <input type="hidden" id="edit-id"><input type="hidden" id="orig-addr">
         <label>NOTE</label><textarea id="edit-note" style="height:80px;"></textarea>
         <div id="edit-chip-area" class="quick-chips" style="margin-bottom:15px;"></div>
+        
+        <label>STATION</label><input type="text" id="edit-station" placeholder="Nearest Station (e.g. Shinjuku)">
+        
         <label>REP</label><input type="text" id="edit-rep">
         <label>ID</label><input type="text" id="edit-r">
         <label>NAME</label><input type="text" id="edit-name">
@@ -735,7 +738,8 @@
                             lat: coords.lat, 
                             lng: coords.lng, 
                             rep_name: newRepName, 
-                            note: "" 
+                            note: "",
+                            station: "" // 追加：初期値
                         });
                         count++; log(`Processing... ${count}`);
                     } catch(e) {}
@@ -761,7 +765,7 @@
             const fSt = document.getElementById('stationFilter').value;
             const mapBaseData = db.filter(d => {
                 if(fPref !== "ALL" && getPrefecture(d.address) !== fPref) return false;
-                if(fSt !== "ALL" && (d.station||"未特定") !== fSt) return false;
+                if(fSt !== "ALL" && (d.station||"") !== fSt) return false; // 駅フィルタ修正
                 return true;
             });
             const center = map.getCenter();
@@ -813,10 +817,61 @@
     }
 
     function getPrefecture(a) { const m=a.match(/(...??[都道府県])/); return m?m[1]:"Others"; }
+    
+    // ★機能強化：フィルタロジックの分割
     function populateFilters() {
-        const pSel=document.getElementById('prefFilter'), sSel=document.getElementById('stationFilter');
+        populatePrefFilter();
+        populateStationFilter();
+    }
+
+    function populatePrefFilter() {
+        const pSel=document.getElementById('prefFilter');
+        // 既存の選択肢を保持しないとリセットされるため、現在の値を保存するならここで処理が必要ですが
+        // 今回はシンプルに再生成します（初期ロード時などに使うため）
+        const current = pSel.value;
         pSel.innerHTML='<option value="ALL">PREFECTURE: ALL</option>';
         [...new Set(db.map(x=>getPrefecture(x.address)))].sort().forEach(p=>{const o=document.createElement('option');o.value=p;o.innerText=p;pSel.appendChild(o)});
+        pSel.value = current;
+    }
+
+    // ★機能追加：選択された都道府県に基づいて駅リストを更新
+    function populateStationFilter() {
+        const pSel = document.getElementById('prefFilter');
+        const sSel = document.getElementById('stationFilter');
+        const selPref = pSel.value;
+        
+        // 現在選択中の駅を保持しようと試みる
+        const currentStation = sSel.value;
+
+        // DBから対象を抽出
+        let targets = db;
+        if(selPref !== "ALL") {
+            targets = db.filter(d => getPrefecture(d.address) === selPref);
+        }
+
+        // 駅名抽出（空でないもの）
+        const stations = [...new Set(targets.map(d => d.station).filter(s => s && s.trim() !== ""))].sort();
+
+        sSel.innerHTML = '<option value="ALL">STATION: ALL</option>';
+        stations.forEach(s => {
+            const o = document.createElement('option');
+            o.value = s;
+            o.innerText = s;
+            sSel.appendChild(o);
+        });
+        
+        // もし前の選択肢が新しいリストにもあれば維持、なければALLへ
+        if(stations.includes(currentStation)) {
+            sSel.value = currentStation;
+        } else {
+            sSel.value = "ALL";
+        }
+    }
+
+    // ★機能追加：都道府県変更時のイベントハンドラ
+    function onPrefChange() {
+        populateStationFilter(); // 駅リストを更新
+        resetAndRender();        // 描画更新
     }
 
     function toggleMapSync() { mapSyncMode = document.getElementById('mapSyncToggle').checked; if(mapSyncMode) resetAndRender(); }
@@ -827,10 +882,12 @@
     function render() {
         const area = document.getElementById('result-area'); area.innerHTML = "";
         const fPref = document.getElementById('prefFilter').value;
+        const fSt = document.getElementById('stationFilter').value; // 駅フィルタ
         const q = normalize(document.getElementById('searchInput').value);
 
         let filtered = db.filter(d => {
             if(fPref !== "ALL" && getPrefecture(d.address) !== fPref) return false;
+            if(fSt !== "ALL" && (d.station||"") !== fSt) return false; // 駅フィルタ判定
             if(!q) return true;
             return normalize(d.name + d.r_code + d.rep_name + d.address + (d.building||"")).includes(q);
         });
@@ -860,13 +917,11 @@
             const isMe = targetReps.includes(c.rep_name);
             const color = isMe ? "#5d7ea3" : "#bf5b5b"; 
             
-            // ★ビル名のスタイル調整（絵文字削除・info-subと同じ見た目に）
             const buildHtml = c.building ? `<div class="info-sub">${c.building}</div>` : "";
             
             const div = document.createElement('div');
             div.className = 'customer-item';
             
-            // ★レイアウト変更：住所を上に、ビル名を下に。最寄り駅復活。
             div.innerHTML = `<div style="flex:1;">
                 <div class="info-main">
                     <span style="background:${color};width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:10px;vertical-align:middle;"></span>${c.name}
@@ -921,6 +976,9 @@
         document.getElementById('edit-tel').value = d.tel||""; 
         document.getElementById('edit-addr').value = d.address; 
         
+        // ★機能追加：駅の読み込み
+        document.getElementById('edit-station').value = d.station||"";
+
         document.getElementById('orig-addr').value = d.address; 
 
         const chipArea = document.getElementById('edit-chip-area');
@@ -952,6 +1010,9 @@
         db[idx].building = document.getElementById('edit-building').value;
         db[idx].tel = document.getElementById('edit-tel').value;
         db[idx].address = newAddr;
+        
+        // ★機能追加：駅の保存
+        db[idx].station = document.getElementById('edit-station').value;
 
         if(newAddr !== oldAddr && newAddr !== "" && geocoder) {
             try {
@@ -975,6 +1036,10 @@
         }
 
         saveDB(); 
+        
+        // ★保存後にフィルタ選択肢も更新（新しい駅が増えた場合などのため）
+        populateFilters();
+        
         render(); 
         closeModal(); 
     }
