@@ -194,7 +194,7 @@
         }
         .btn-copy:hover { border-color: var(--gold); color: var(--gold); }
 
-        /* 登録フォーム */
+        /* 登録フォーム（拡張） */
         .toggle-card { 
             background: var(--card); border-radius: var(--radius); margin-top: 30px; 
             box-shadow: var(--shadow); overflow: hidden; border: 1px solid rgba(0,0,0,0.02);
@@ -206,6 +206,16 @@
         }
         .toggle-content { padding: 25px; display: none; border-top: 1px solid #f5f5f5; background: #fafafa; }
         
+        .mode-switch {
+            display: flex; gap: 15px; margin-bottom: 20px;
+        }
+        .mode-label {
+            display: flex; align-items: center; font-size: 0.85rem; font-weight: 500; cursor: pointer;
+            color: var(--text-sub); font-family: var(--font-serif);
+        }
+        .mode-label input { margin-right: 6px; accent-color: var(--gold); }
+        .mode-label.active { color: var(--text-main); font-weight: bold; }
+
         label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--gold); margin-bottom: 8px; margin-top: 20px; font-family: var(--font-eng); letter-spacing: 0.1em; }
         input[type="text"], textarea { 
             width: 100%; padding: 12px; border: 1px solid #ddd; background: #fff; 
@@ -380,11 +390,25 @@
                 <span>＋ DATA REGISTRATION</span> <span>▼</span>
             </div>
             <div class="toggle-content" id="input-area">
-                <label>REP NAME</label>
-                <input type="text" id="repName" placeholder="e.g. Sato">
-                <label>DATA PASTE (5 Columns: ID|Company|Shop|Addr|Tel)</label>
-                <textarea id="csvInput" placeholder="R001	(Inc)ABC	Omiya	Saitama...	090-1234-5678" style="height:100px;"></textarea>
-                <button class="btn-main" id="runBtn" onclick="processData()">START ANALYSIS</button>
+                <div class="mode-switch">
+                    <label class="mode-label active">
+                        <input type="radio" name="regMode" value="new" checked onchange="changeRegMode()"> NEW REG (6 Cols)
+                    </label>
+                    <label class="mode-label">
+                        <input type="radio" name="regMode" value="update" onchange="changeRegMode()"> UPDATE BUILDING (2 Cols)
+                    </label>
+                </div>
+
+                <div id="mode-new-area">
+                    <label>REP NAME</label>
+                    <input type="text" id="repName" placeholder="e.g. Sato">
+                </div>
+                
+                <label id="csv-label">DATA PASTE (6 Cols: ID|Corp|Shop|Building|Addr|Tel)</label>
+                <textarea id="csvInput" placeholder="R001	(Inc)ABC	Omiya	XX Building 3F	Saitama...	090-1234-5678" style="height:120px;"></textarea>
+                
+                <button class="btn-main" id="runBtn" onclick="processData()">EXECUTE</button>
+                
                 <div class="data-tools">
                     <button class="btn-sub" onclick="shareOrDownload()">💾 SAVE JSON</button>
                     <button class="btn-sub" onclick="document.getElementById('fileInput').click()">📂 LOAD JSON</button>
@@ -438,6 +462,7 @@
         <label>REP</label><input type="text" id="edit-rep">
         <label>ID</label><input type="text" id="edit-r">
         <label>NAME</label><input type="text" id="edit-name">
+        <label>BUILDING</label><input type="text" id="edit-building">
         <label>TEL</label><input type="text" id="edit-tel">
         <label>ADDRESS</label><input type="text" id="edit-addr">
         <div style="display:flex; gap:15px; margin-top:30px;">
@@ -496,6 +521,23 @@
         }
         document.getElementById('current-db-name').innerText = DB_NAME;
     };
+
+    function changeRegMode() {
+        const mode = document.querySelector('input[name="regMode"]:checked').value;
+        const repArea = document.getElementById('mode-new-area');
+        const label = document.getElementById('csv-label');
+        const input = document.getElementById('csvInput');
+        
+        if(mode === 'new') {
+            repArea.style.display = 'block';
+            label.innerText = "DATA PASTE (6 Cols: ID|Corp|Shop|Building|Addr|Tel)";
+            input.placeholder = "R001\t(Inc)ABC\tOmiya\tXX Building 3F\tSaitama...\t090-1234-5678";
+        } else {
+            repArea.style.display = 'none';
+            label.innerText = "UPDATE BUILDING NAME (2 Cols: ID|Building)";
+            input.placeholder = "R001\tNew Building Name 4F\nR002\tAnother Building B1";
+        }
+    }
 
     function openSettings() {
         const modal = document.getElementById('settingsModal');
@@ -643,27 +685,84 @@
     function addNote(text) { const area = document.getElementById('edit-note'); area.value = (area.value ? area.value + " " : "") + text; }
 
     async function processData() {
-        const key = document.getElementById('apiKey').value.trim(); const csv = document.getElementById('csvInput').value.trim(); 
-        const newRepName = document.getElementById('repName').value.trim();
+        const mode = document.querySelector('input[name="regMode"]:checked').value;
+        const csv = document.getElementById('csvInput').value.trim(); 
         if(!csv) return alert('Paste list data first');
-        const btn = document.getElementById('runBtn'); btn.disabled = true; btn.innerText = "Processing..."; 
-        try {
-            await initSystem(localStorage.getItem('map_apiKey'));
-            const lines = csv.split('\n'); let count = 0;
-            for(let line of lines) {
-                const cols = line.trim().split(/\t/).map(s=>s.trim());
-                if(cols.length < 4) continue;
-                let r=cols[0], name=(cols[1]+" "+cols[2]).trim(), addr=cols[3], tel=cols[4]||"";
-                try {
-                    const coords = await new Promise((res, rej) => geocoder.geocode({ address: addr }, (r, s) => s==='OK'?res({lat: r[0].geometry.location.lat(), lng: r[0].geometry.location.lng()}):rej(s)));
-                    db.push({ id: Math.random().toString(36).substr(2, 9), r_code: r, name: name, address: addr, tel: tel, lat: coords.lat, lng: coords.lng, rep_name: newRepName, note: "" });
-                    count++; log(`Processing... ${count}`);
-                } catch(e) {}
-                await new Promise(r => setTimeout(r, 400));
+        
+        const btn = document.getElementById('runBtn'); btn.disabled = true; btn.innerText = "Processing...";
+        
+        if (mode === 'update') {
+            // --- 更新モード (Rコード | ビル名) ---
+            try {
+                const lines = csv.split('\n');
+                let updateCount = 0;
+                for(let line of lines) {
+                    const cols = line.trim().split(/\t/).map(s=>s.trim());
+                    if(cols.length < 2) continue;
+                    const rCode = cols[0];
+                    const build = cols[1];
+                    
+                    // Rコードで検索してビル名を更新
+                    const target = db.find(d => d.r_code === rCode);
+                    if(target) {
+                        target.building = build;
+                        updateCount++;
+                    }
+                }
+                saveDB(); render();
+                alert(`${updateCount} Records Updated!`);
+            } finally {
+                btn.disabled = false; btn.innerText = "EXECUTE";
             }
-            saveDB(); populateFilters(); resetAndRender(); 
-            alert(`${count} Completed`);
-        } finally { btn.disabled = false; btn.innerText = "START ANALYSIS"; }
+        } else {
+            // --- 新規登録モード (6列) ---
+            const key = document.getElementById('apiKey').value.trim();
+            const newRepName = document.getElementById('repName').value.trim();
+            
+            try {
+                await initSystem(localStorage.getItem('map_apiKey'));
+                const lines = csv.split('\n'); let count = 0;
+                for(let line of lines) {
+                    const cols = line.trim().split(/\t/).map(s=>s.trim());
+                    // 6列: R(0)|Corp(1)|Shop(2)|Build(3)|Addr(4)|Tel(5)
+                    if(cols.length < 5) continue; 
+                    
+                    let r=cols[0];
+                    let name=(cols[1]+" "+cols[2]).trim();
+                    let build = cols[3];
+                    let addr = cols[4];
+                    let tel = cols[5]||"";
+
+                    // 以前の5列データが混ざった場合のガード（列が足りない場合、ビル名を空にして住所をずらす）
+                    if (cols.length === 5) {
+                        // 5列の場合: R|Corp|Shop|Addr|Tel
+                        build = "";
+                        addr = cols[3];
+                        tel = cols[4]||"";
+                    }
+
+                    try {
+                        const coords = await new Promise((res, rej) => geocoder.geocode({ address: addr }, (r, s) => s==='OK'?res({lat: r[0].geometry.location.lat(), lng: r[0].geometry.location.lng()}):rej(s)));
+                        db.push({ 
+                            id: Math.random().toString(36).substr(2, 9), 
+                            r_code: r, 
+                            name: name, 
+                            building: build,
+                            address: addr, 
+                            tel: tel, 
+                            lat: coords.lat, 
+                            lng: coords.lng, 
+                            rep_name: newRepName, 
+                            note: "" 
+                        });
+                        count++; log(`Processing... ${count}`);
+                    } catch(e) {}
+                    await new Promise(r => setTimeout(r, 400));
+                }
+                saveDB(); populateFilters(); resetAndRender(); 
+                alert(`${count} Completed`);
+            } finally { btn.disabled = false; btn.innerText = "EXECUTE"; }
+        }
     }
 
     function updateMapPins(displayTargets) {
@@ -720,7 +819,8 @@
                 group.forEach(c => {
                     const telBtn = c.tel ? `<a href="tel:${c.tel}" class="info-tel">📞 ${c.tel}</a>` : "";
                     const note = c.note ? `<div style="background:#fcf8e3;padding:4px;font-size:0.75rem;margin-bottom:4px;border-radius:2px;color:#8a6d3b;">${c.note}</div>` : "";
-                    html += `<div class="info-window-card"><div class="info-title">${c.name}</div><div class="info-meta">${c.rep_name} / ${c.r_code}</div>${telBtn}<div class="info-addr">${c.address}</div>${note}<button class="info-btn btn-edit" onclick="openEdit('${c.id}')">EDIT</button></div>`;
+                    const build = c.building ? `<div style="font-size:0.8rem;color:#444;margin-bottom:2px;font-weight:bold;">${c.building}</div>` : "";
+                    html += `<div class="info-window-card"><div class="info-title">${c.name}</div><div class="info-meta">${c.rep_name} / ${c.r_code}</div>${telBtn}${build}<div class="info-addr">${c.address}</div>${note}<button class="info-btn btn-edit" onclick="openEdit('${c.id}')">EDIT</button></div>`;
                 });
                 html += '</div>';
                 infoWindow.setContent(html); infoWindow.open(map, m);
@@ -750,7 +850,7 @@
         let filtered = db.filter(d => {
             if(fPref !== "ALL" && getPrefecture(d.address) !== fPref) return false;
             if(!q) return true;
-            return normalize(d.name + d.r_code + d.rep_name + d.address).includes(q);
+            return normalize(d.name + d.r_code + d.rep_name + d.address + (d.building||"")).includes(q);
         });
 
         if(mapSyncMode && map) {
@@ -776,10 +876,12 @@
 
         displayTargets.forEach(c => {
             const isMe = targetReps.includes(c.rep_name);
-            const color = isMe ? "#5d7ea3" : "#bf5b5b"; // Muted Blue / Muted Red
+            const color = isMe ? "#5d7ea3" : "#bf5b5b"; 
+            const buildHtml = c.building ? `<div style="font-weight:600; font-size:0.9rem; color:#444; margin-bottom:4px;">🏬 ${c.building}</div>` : "";
+            
             const div = document.createElement('div');
             div.className = 'customer-item';
-            div.innerHTML = `<div style="flex:1;"><div class="info-main"><span style="background:${color};width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:10px;vertical-align:middle;"></span>${c.name}</div><div class="info-sub"><span class="tag">${c.r_code||"-"}</span>${c.rep_name||""}</div><div class="info-sub">📞 ${c.tel||""} <button class="btn-copy" onclick="copyToClipboard('${c.tel}')">COPY</button></div><div class="info-sub">${c.address}</div><div style="font-size:0.75rem;color:#bfa37e;margin-top:6px;font-style:italic;">${c.note?'📝 '+c.note:''}</div></div><div class="action-area"><a href="tel:${c.tel}" class="icon-btn call">📞</a><button onclick="panToMap(${c.lat},${c.lng})" class="icon-btn map">📍</button></div>`;
+            div.innerHTML = `<div style="flex:1;"><div class="info-main"><span style="background:${color};width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:10px;vertical-align:middle;"></span>${c.name}</div><div class="info-sub"><span class="tag">${c.r_code||"-"}</span>${c.rep_name||""}</div><div class="info-sub">📞 ${c.tel||""} <button class="btn-copy" onclick="copyToClipboard('${c.tel}')">COPY</button></div>${buildHtml}<div class="info-sub">${c.address}</div><div style="font-size:0.75rem;color:#bfa37e;margin-top:6px;font-style:italic;">${c.note?'📝 '+c.note:''}</div></div><div class="action-area"><a href="tel:${c.tel}" class="icon-btn call">📞</a><button onclick="panToMap(${c.lat},${c.lng})" class="icon-btn map">📍</button></div>`;
             area.appendChild(div);
         });
         const btnArea = document.getElementById('load-more-btn');
@@ -790,7 +892,6 @@
         map.setZoom(17); 
         map.panTo({lat, lng}); 
         
-        // ★修正: ピンを押したら強制的に「連動モード」をONにして周辺を表示する
         const toggle = document.getElementById('mapSyncToggle');
         if(!toggle.checked) {
             toggle.checked = true;
@@ -809,6 +910,7 @@
         document.getElementById('edit-rep').value = d.rep_name||""; 
         document.getElementById('edit-r').value = d.r_code||""; 
         document.getElementById('edit-name').value = d.name; 
+        document.getElementById('edit-building').value = d.building||"";
         document.getElementById('edit-tel').value = d.tel||""; 
         document.getElementById('edit-addr').value = d.address; 
         
@@ -830,6 +932,7 @@
         db[idx].note = document.getElementById('edit-note').value;
         db[idx].rep_name = document.getElementById('edit-rep').value;
         db[idx].name = document.getElementById('edit-name').value;
+        db[idx].building = document.getElementById('edit-building').value;
         saveDB(); render(); closeModal(); 
     }
     function deleteCustomer() { if(confirm("Delete this customer?")) { db = db.filter(x => x.id !== document.getElementById('edit-id').value); saveDB(); render(); closeModal(); } }
