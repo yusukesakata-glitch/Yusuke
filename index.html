@@ -859,11 +859,29 @@
         displayTargets.forEach(c => {
             const isMe = targetReps.includes(c.rep_name);
             const color = isMe ? "#5d7ea3" : "#bf5b5b"; 
-            const buildHtml = c.building ? `<div style="font-weight:600; font-size:0.9rem; color:#444; margin-bottom:4px;">🏬 ${c.building}</div>` : "";
+            
+            // ★ビル名のスタイル調整（絵文字削除・info-subと同じ見た目に）
+            const buildHtml = c.building ? `<div class="info-sub">${c.building}</div>` : "";
             
             const div = document.createElement('div');
             div.className = 'customer-item';
-            div.innerHTML = `<div style="flex:1;"><div class="info-main"><span style="background:${color};width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:10px;vertical-align:middle;"></span>${c.name}</div><div class="info-sub"><span class="tag">${c.r_code||"-"}</span>${c.rep_name||""}</div><div class="info-sub">📞 ${c.tel||""} <button class="btn-copy" onclick="copyToClipboard('${c.tel}')">COPY</button></div>${buildHtml}<div class="info-sub">${c.address}</div><div style="font-size:0.75rem;color:#bfa37e;margin-top:6px;font-style:italic;">${c.note?'📝 '+c.note:''}</div></div>
+            
+            // ★レイアウト変更：住所を上に、ビル名を下に。最寄り駅復活。
+            div.innerHTML = `<div style="flex:1;">
+                <div class="info-main">
+                    <span style="background:${color};width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:10px;vertical-align:middle;"></span>${c.name}
+                </div>
+                <div class="info-sub">
+                    <span class="tag">${c.r_code||"-"}</span>${c.rep_name||""}
+                    ${c.station ? `<span class="tag" style="background:#f4f4f4; border:1px solid #ddd; margin-left:8px;">${c.station}</span>` : ""}
+                </div>
+                <div class="info-sub">
+                    📞 ${c.tel||""} <button class="btn-copy" onclick="copyToClipboard('${c.tel}')">COPY</button>
+                </div>
+                <div class="info-sub">${c.address}</div>
+                ${buildHtml}
+                <div style="font-size:0.75rem;color:#bfa37e;margin-top:6px;font-style:italic;">${c.note?'📝 '+c.note:''}</div>
+            </div>
             <div class="action-area">
                 <button onclick="openEdit('${c.id}')" class="icon-btn edit">✏️</button>
                 <a href="tel:${c.tel}" class="icon-btn call">📞</a>
