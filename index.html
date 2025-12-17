@@ -8,13 +8,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 
     <style>
-        /* --- デザイン定義 --- */
+        /* --- デザイン定義（白ベース×赤アクセント） --- */
         :root {
             --bg: #F5F5F7;          /* 背景：薄いグレー */
             --card: #FFFFFF;        /* カード：白 */
             --text-main: #333333;   /* 文字：濃いグレー */
             --text-sub: #666666;    /* サブ文字：グレー */
-            --accent-red: #D32F2F;  /* アクセント：赤 */
+            --accent-red: #cc3300;  /* アクセント：赤 */
             --tag-bg: #EFEBE4;      /* タグ背景：ベージュ */
             --tag-text: #5D5548;    /* タグ文字：茶グレー */
             --shadow: 0 2px 8px rgba(0,0,0,0.05);
@@ -30,7 +30,7 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* レイアウト構造 */
+        /* レイアウト */
         .app-container { display: flex; flex-direction: column; height: 100%; max-width: 1600px; margin: 0 auto; padding: 15px; box-sizing: border-box; gap: 15px; }
         
         @media (min-width: 900px) {
@@ -49,16 +49,16 @@
         /* ヘッダー */
         .header-area { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         h1 { font-size: 1.2rem; font-weight: 700; margin: 0; }
-        .btn-settings { background: #fff; border: 1px solid #ccc; padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; cursor: pointer; }
+        .btn-settings { background: #fff; border: 1px solid #ccc; padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 5px;}
 
-        /* 検索・フィルタ */
+        /* フィルタ・検索 */
         .filter-area { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
         select { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ddd; background: #fff; }
         .list-search-box { position: relative; margin-bottom: 15px; }
         .list-search-box input { width: 100%; padding: 10px 10px 10px 35px; border-radius: 6px; border: 1px solid #ddd; box-sizing: border-box; }
         .list-search-icon { position: absolute; left: 10px; top: 10px; color: #aaa; }
 
-        /* --- リストカード (指定のデザイン・並び順) --- */
+        /* --- リストカード (ご指定の並び順) --- */
         .customer-item { 
             background: var(--card); padding: 20px; border-radius: var(--radius); 
             margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;
@@ -67,7 +67,7 @@
 
         .info-col-left { flex: 1; display: flex; flex-direction: column; gap: 6px; }
 
-        /* 1. タイトル (赤丸付き) */
+        /* 1. 名称 (赤丸付き) */
         .info-main { 
             font-size: 1rem; font-weight: 700; display: flex; align-items: flex-start; line-height: 1.4; 
         }
@@ -85,23 +85,25 @@
         }
         .text-rep { font-size: 0.85rem; font-weight: 500; }
 
-        /* 3 & 4. 住所 & ビル名 */
-        .info-address, .info-building { 
-            font-size: 0.85rem; color: var(--text-main); margin-left: 18px; line-height: 1.4;
-            display: flex; align-items: flex-start; gap: 6px;
+        /* 3. 住所 */
+        .info-address { font-size: 0.85rem; color: var(--text-main); margin-left: 18px; line-height: 1.4; }
+
+        /* 4. ビル名 */
+        .info-building { 
+            font-size: 0.85rem; color: var(--text-main); margin-left: 18px; line-height: 1.4; 
+            font-weight: 700; display: flex; align-items: center; gap: 5px;
         }
-        .info-building { font-weight: 700; margin-top: 2px; } /* ビル名は太字 */
-        
+
         /* 5. 電話番号 */
         .info-tel-row { display: flex; align-items: center; gap: 8px; margin-left: 18px; margin-top: 2px; }
-        .tel-number { font-size: 0.95rem; font-weight: 500; letter-spacing: 0.05em; }
+        .tel-number { font-size: 0.95rem; font-weight: 500; letter-spacing: 0.05em; font-family: 'Roboto', sans-serif;}
         .btn-copy-sm { 
-            font-size: 0.6rem; padding: 1px 5px; border: 1px solid #ccc; 
+            font-size: 0.6rem; padding: 1px 6px; border: 1px solid #ccc; 
             border-radius: 2px; background: #fff; color: #666; cursor: pointer; 
         }
 
         /* SVGアイコン */
-        .svg-icon { width: 16px; height: 16px; fill: currentColor; flex-shrink: 0; margin-top: 2px; }
+        .svg-icon { width: 16px; height: 16px; fill: currentColor; flex-shrink: 0; }
         .icon-red { color: var(--accent-red); }
         .icon-build { color: #d4a373; }
 
@@ -112,16 +114,16 @@
         .circle-btn {
             width: 36px; height: 36px; border-radius: 50%; background: #fff; 
             border: 1px solid #eee; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; color: var(--text-main); transition: 0.2s;
+            cursor: pointer; color: var(--text-main); transition: 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.03);
         }
         .circle-btn:hover { background: #f9f9f9; border-color: var(--accent-red); }
         .circle-btn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; }
         .circle-btn.red-icon svg { stroke: var(--accent-red); }
-        .circle-btn.pin svg { fill: var(--accent-red); stroke: none; }
+        .circle-btn.pin svg { fill: var(--accent-red); stroke: none; } /* ピンは塗りつぶし */
 
-        /* マップ関連 */
+        /* マップ検索・ボタン */
         .place-search-box { display: flex; margin-bottom: 10px; }
-        .place-search-input { flex:1; padding:10px; border:1px solid #ccc; border-radius:4px 0 0 4px; }
+        .place-search-input { flex:1; padding:10px; border:1px solid #ccc; border-radius:4px 0 0 4px; outline:none; }
         .place-search-btn { padding:0 15px; border:1px solid #ccc; border-left:none; background:#fff; border-radius:0 4px 4px 0; cursor:pointer; }
         
         .map-sync-wrapper { position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.9); padding: 5px 10px; border-radius: 20px; z-index: 10; display: flex; align-items: center; gap: 5px; font-size: 0.75rem; font-weight: bold; }
@@ -134,21 +136,22 @@
 
         #gpsBtn { position: absolute; bottom: 20px; right: 10px; width: 40px; height: 40px; border-radius: 50%; background: #fff; border: none; box-shadow: 0 2px 6px rgba(0,0,0,0.2); cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; z-index: 10; }
 
-        /* モーダル */
+        /* モーダル共通 */
         .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:none; justify-content:center; align-items:center; z-index:9999; }
-        .modal-content { background:#fff; padding:25px; border-radius:12px; width:90%; max-width:500px; max-height:85vh; overflow-y:auto; }
+        .modal-content { background:#fff; padding:25px; border-radius:12px; width:90%; max-width:500px; max-height:85vh; overflow-y:auto; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        
         .settings-section { margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #eee; }
         .btn-main { width: 100%; padding: 12px; background: #333; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        .btn-sub { padding: 8px 12px; background: #eee; border: none; border-radius: 6px; cursor: pointer; }
-        .btn-del { width: 100%; padding: 10px; background: #fff0f0; color: red; border: none; border-radius: 6px; cursor: pointer; margin-top: 10px; }
+        .btn-sub { padding: 8px 12px; background: #eee; border: none; border-radius: 6px; cursor: pointer; color: #333; }
+        .btn-del { width: 100%; padding: 10px; background: #fff0f0; color: red; border: none; border-radius: 6px; cursor: pointer; margin-top: 10px; font-weight: bold; }
 
-        /* 統計 */
+        /* 統計エリア */
         #stats-area { background: #fff; padding: 10px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #eee; }
         .stats-grid { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px; }
         .stats-item { background: #f0f0f0; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; }
         .stats-item.selected { background: var(--accent-red); color: white; }
 
-        #load-more-btn { width: 100%; padding: 10px; background: #fff; border: 1px solid #ccc; border-radius: 20px; cursor: pointer; margin-top: 10px; display: none; }
+        #load-more-btn { width: 100%; padding: 10px; background: #fff; border: 1px solid #ccc; border-radius: 20px; cursor: pointer; margin-top: 10px; display: none; color: #555; }
     </style>
 </head>
 <body>
@@ -161,7 +164,7 @@
         </div>
         <div class="map-wrapper">
             <div id="google-map-view" style="width:100%; height:100%;"></div>
-            <div id="map-placeholder-msg" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); pointer-events:none;">地図を準備中...</div>
+            <div id="map-placeholder-msg" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:rgba(255,255,255,0.9); padding:10px 20px; border-radius:8px; pointer-events:none;">地図を準備中...</div>
             <div class="map-sync-wrapper">
                 <span>連動</span>
                 <label class="toggle-switch">
@@ -192,13 +195,13 @@
         <div id="stats-area">
             <div style="display:flex; justify-content:space-between;">
                 <span id="stats-total-text" style="font-weight:bold;">-- 件</span>
-                <select id="limitSelect" onchange="changeLimit()" style="padding:2px;"><option value="100">100件</option><option value="ALL">全件</option></select>
+                <select id="limitSelect" onchange="changeLimit()" style="padding:2px; border-radius:4px;"><option value="100">100件</option><option value="ALL">全件</option></select>
             </div>
             <div class="stats-grid" id="stats-detail"></div>
         </div>
 
         <div id="result-area"></div>
-        <button id="load-more-btn" onclick="loadMore()">さらに表示</button>
+        <button id="load-more-btn" onclick="loadMore()">👇 さらに表示</button>
         <div style="height:60px;"></div>
     </div>
 </div>
@@ -208,7 +211,7 @@
         <h3 style="text-align:center; margin-top:0;">設定メニュー</h3>
         
         <div class="settings-section">
-            <label style="font-weight:bold; display:block; margin-bottom:5px;">APIキー</label>
+            <label style="font-weight:bold; display:block; margin-bottom:5px;">🔑 APIキー設定</label>
             <div style="display:flex; gap:5px;">
                 <input type="password" id="apiKey" placeholder="AIzaSy..." style="flex:1; padding:8px; border:1px solid #ddd; border-radius:4px;">
                 <button onclick="saveKeyAndInit()" class="btn-sub">保存</button>
@@ -217,7 +220,7 @@
 
         <div class="settings-section">
             <label style="font-weight:bold; display:block; margin-bottom:5px;">📥 データ登録・更新</label>
-            <div style="background:#f9f9f9; padding:10px; border-radius:6px;">
+            <div style="background:#f9f9f9; padding:10px; border-radius:6px; border:1px solid #eee;">
                 <div style="display:flex; gap:10px; margin-bottom:10px;">
                     <label style="cursor:pointer; font-size:0.9rem;"><input type="radio" name="regMode" value="new" checked onchange="changeRegMode()"> 新規登録(6列)</label>
                     <label style="cursor:pointer; font-size:0.9rem;"><input type="radio" name="regMode" value="update" onchange="changeRegMode()"> ビル名更新(2列)</label>
@@ -236,12 +239,12 @@
                     <input type="file" id="fileInput" accept=".json" style="display:none" onchange="uploadData(this)">
                     <button class="btn-sub" onclick="clearAll()" style="color:red; margin-left:auto;">全削除</button>
                 </div>
-                <div id="log-area" style="font-size:0.75rem; color:#666; margin-top:5px;"></div>
+                <div id="log-area" style="font-size:0.75rem; color:#666; margin-top:5px; text-align:center;"></div>
             </div>
         </div>
 
         <div class="settings-section">
-            <label style="font-weight:bold; display:block; margin-bottom:5px;">青ピンにする担当者</label>
+            <label style="font-weight:bold; display:block; margin-bottom:5px;">📍 青ピンにする担当者</label>
             <div id="rep-checklist" style="max-height:100px; overflow-y:auto; border:1px solid #eee; padding:5px;"></div>
         </div>
 
@@ -255,13 +258,27 @@
         <input type="hidden" id="edit-id">
         
         <label style="display:block; font-size:0.8rem; color:#666;">備考</label>
-        <textarea id="edit-note" style="width:100%; height:60px; padding:8px; border:1px solid #ddd; border-radius:4px; box-sizing:border-box; margin-bottom:10px;"></textarea>
+        <textarea id="edit-note" style="width:100%; height:50px; padding:8px; border:1px solid #ddd; border-radius:4px; box-sizing:border-box; margin-bottom:10px;"></textarea>
         
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+            <div>
+                <label style="display:block; font-size:0.8rem; color:#666;">Rコード</label>
+                <input type="text" id="edit-r" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px; box-sizing:border-box; margin-bottom:10px;">
+            </div>
+            <div>
+                <label style="display:block; font-size:0.8rem; color:#666;">担当者</label>
+                <input type="text" id="edit-rep" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px; box-sizing:border-box; margin-bottom:10px;">
+            </div>
+        </div>
+
+        <label style="display:block; font-size:0.8rem; color:#666;">名称</label>
+        <input type="text" id="edit-name" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px; box-sizing:border-box; margin-bottom:10px;">
+
+        <label style="display:block; font-size:0.8rem; color:#666;">住所</label>
+        <input type="text" id="edit-addr" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px; box-sizing:border-box; margin-bottom:10px;">
+
         <label style="display:block; font-size:0.8rem; color:#666;">ビル名</label>
         <input type="text" id="edit-building" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px; box-sizing:border-box; margin-bottom:10px;">
-        
-        <label style="display:block; font-size:0.8rem; color:#666;">担当者</label>
-        <input type="text" id="edit-rep" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px; box-sizing:border-box; margin-bottom:10px;">
         
         <label style="display:block; font-size:0.8rem; color:#666;">電話番号</label>
         <input type="text" id="edit-tel" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px; box-sizing:border-box; margin-bottom:10px;">
@@ -281,11 +298,10 @@
     let mapSyncMode = false;
     let targetReps = []; 
     let db = [];
-    let map, geocoder, AdvancedMarkerElement;
+    let map, geocoder;
     let markers = [];
     let watchId = null;
 
-    // --- 初期化 ---
     window.onload = () => {
         const k = localStorage.getItem('map_apiKey');
         const d = localStorage.getItem(DB_NAME);
@@ -302,14 +318,14 @@
         }
     };
 
-    // --- Google Maps API ---
     async function initSystem(key) {
         if(window.google && window.google.maps && map) return;
         
+        // AdvancedMarkerではなく標準マーカーを使うためlibraries=markerは不要だが念のため
         if(!document.querySelector('script[src*="maps.googleapis.com"]')) {
             await new Promise((resolve) => {
                 const s = document.createElement('script');
-                s.src = `https://maps.googleapis.com/maps/api/js?key=${key}&loading=async&libraries=places,geocoding,geometry,marker`;
+                s.src = `https://maps.googleapis.com/maps/api/js?key=${key}&loading=async&libraries=places,geocoding`;
                 s.async = true;
                 s.onload = resolve;
                 document.head.appendChild(s);
@@ -319,21 +335,22 @@
         try {
             const { Map } = await google.maps.importLibrary("maps"); 
             const { Geocoder } = await google.maps.importLibrary("geocoding");
-            const { AdvancedMarkerElement: AM } = await google.maps.importLibrary("marker");
-            geocoder = new Geocoder(); AdvancedMarkerElement = AM;
+            geocoder = new Geocoder(); 
             
             map = new Map(document.getElementById('google-map-view'), { 
-                center:{lat:35.68, lng:139.76}, zoom:13, mapId: "DEMO_MAP_ID", 
+                center:{lat:35.68, lng:139.76}, zoom:13, 
                 mapTypeControl: false, streetViewControl: false 
             });
             
             map.addListener('idle', () => { if(mapSyncMode) resetAndRender(); });
             document.getElementById('map-placeholder-msg').style.display='none';
             if(db.length > 0) render(); 
-        } catch(e) { console.error(e); }
+        } catch(e) { 
+            console.error(e);
+            document.getElementById('map-placeholder-msg').innerText = "マップ読込エラー";
+        }
     }
 
-    // --- レンダリング (画像のデザインを再現) ---
     function render() {
         const area = document.getElementById('result-area'); area.innerHTML = "";
         const fPref = document.getElementById('prefFilter').value;
@@ -358,17 +375,15 @@
             const div = document.createElement('div');
             div.className = 'customer-item';
             
-            // ビル名 (SVGアイコン付き)
-            const buildDisplay = c.building ? 
-                `<div class="info-building">
-                    <svg class="svg-icon icon-build" viewBox="0 0 24 24"><path d="M10 2v18H4V6H2v16h14v-2h2v2h2V8h-2v2h-2v-2h-2V2h-4zm2 2h2v2h-2V4zM6 8h2v2H6V8zm0 4h2v2H6v-2zm8 0h2v2h-2v-2zm-8 4h2v2H6v-2zm8 0h2v2h-2v-2z"/></svg>
-                    ${c.building}
-                 </div>` : "";
-            
-            // 電話番号 (SVGアイコン付き)
-            const telDisplay = c.tel ? 
+            // アイコン
+            const redPhoneIcon = '<svg class="svg-icon icon-red" viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 1.25 1.25 1.45 2.45 1.83 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>';
+            const buildIcon = '<svg class="svg-icon icon-build" viewBox="0 0 24 24"><path d="M10 2v18H4V6H2v16h14v-2h2v2h2V8h-2v2h-2v-2h-2V2h-4zm2 2h2v2h-2V4zM6 8h2v2H6V8zm0 4h2v2H6v-2zm8 0h2v2h-2v-2zm-8 4h2v2H6v-2zm8 0h2v2h-2v-2z"/></svg>';
+
+            // HTML生成 (指定順序: 名前 -> R/担当 -> 住所 -> ビル -> 電話)
+            const buildHtml = c.building ? `<div class="info-building">${buildIcon} ${c.building}</div>` : "";
+            const telHtml = c.tel ? 
                 `<div class="info-tel-row">
-                    <svg class="svg-icon icon-red" viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 1.25 1.25 1.45 2.45 1.83 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+                    ${redPhoneIcon}
                     <span class="tel-number">${c.tel}</span>
                     <button class="btn-copy-sm" onclick="copyToClipboard('${c.tel}')">COPY</button>
                  </div>` : "";
@@ -381,8 +396,8 @@
                         <span class="text-rep">${c.rep_name || "担当なし"}</span>
                     </div>
                     <div class="info-address">${c.address}</div>
-                    ${buildDisplay}
-                    ${telDisplay}
+                    ${buildHtml}
+                    ${telHtml}
                     ${c.note ? `<div style="margin-left:18px; font-size:0.75rem; color:#D32F2F; margin-top:4px;">📝 ${c.note}</div>` : ''}
                 </div>
 
@@ -419,28 +434,35 @@
         document.getElementById('load-more-btn').style.display = (filtered.length > currentLimit) ? 'block' : 'none';
     }
 
+    // ★修正: 標準マーカー(google.maps.Marker)を使用（APIキーのみで動作保証）
     function updateMapPins(targets) {
-        if(!map || !AdvancedMarkerElement) return;
+        if(!map) return;
         markers.forEach(m => m.setMap(null)); markers = [];
         
         targets.forEach(c => {
             if(!c.lat || !c.lng) return;
             const isMe = targetReps.includes(c.rep_name);
-            const pinColor = isMe ? "#2196F3" : "#D32F2F"; 
             
-            const pinView = document.createElement("div");
-            pinView.style.width = "14px";
-            pinView.style.height = "14px";
-            pinView.style.backgroundColor = pinColor;
-            pinView.style.border = "2px solid white";
-            pinView.style.borderRadius = "50%";
-            pinView.style.boxShadow = "0 2px 4px rgba(0,0,0,0.3)";
-
-            const m = new AdvancedMarkerElement({ position: {lat:c.lat, lng:c.lng}, map: map, content: pinView });
-            m.addListener("click", () => {
-                new google.maps.InfoWindow({ content: `<b>${c.name}</b><br>${c.building||""}` }).open(map, m);
+            // SVGマーカーの作成（円形）
+            const color = isMe ? "#2196F3" : "#D32F2F"; // 青 or 赤
+            const marker = new google.maps.Marker({
+                position: {lat:c.lat, lng:c.lng},
+                map: map,
+                title: c.name,
+                icon: {
+                    path: google.maps.SymbolPath.CIRCLE,
+                    scale: 7,
+                    fillColor: color,
+                    fillOpacity: 1,
+                    strokeColor: "white",
+                    strokeWeight: 2
+                }
             });
-            markers.push(m);
+
+            const infoContent = `<div style="font-weight:bold; color:#333;">${c.name}</div><div style="font-size:0.85rem;">${c.building||""}</div>`;
+            const infowindow = new google.maps.InfoWindow({ content: infoContent });
+            marker.addListener("click", () => infowindow.open(map, marker));
+            markers.push(marker);
         });
     }
 
@@ -474,7 +496,10 @@
             watchId = navigator.geolocation.watchPosition((pos) => {
                 const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
                 map.panTo(loc);
-                new AdvancedMarkerElement({ map:map, position:loc, content:document.createElement("div") }); // 簡易現在地ピン
+                new google.maps.Marker({
+                    position: loc, map: map,
+                    icon: { path: google.maps.SymbolPath.CIRCLE, scale: 5, fillColor: "#4285F4", fillOpacity: 1, strokeColor: "white", strokeWeight: 2 }
+                });
             }, null, {enableHighAccuracy:true});
             alert("追跡開始");
         }
@@ -580,9 +605,12 @@
         if(!t) return;
         document.getElementById('edit-id').value = id;
         document.getElementById('edit-note').value = t.note || "";
+        document.getElementById('edit-r').value = t.r_code || "";
+        document.getElementById('edit-name').value = t.name || "";
         document.getElementById('edit-building').value = t.building || "";
         document.getElementById('edit-rep').value = t.rep_name || "";
         document.getElementById('edit-tel').value = t.tel || "";
+        document.getElementById('edit-addr').value = t.address || "";
         document.getElementById('editModal').style.display = 'flex';
     }
     function closeModal() { document.getElementById('editModal').style.display='none'; }
@@ -591,9 +619,12 @@
         const t = db.find(d => d.id === id);
         if(t) {
             t.note = document.getElementById('edit-note').value;
+            t.r_code = document.getElementById('edit-r').value;
+            t.name = document.getElementById('edit-name').value;
             t.building = document.getElementById('edit-building').value;
             t.rep_name = document.getElementById('edit-rep').value;
             t.tel = document.getElementById('edit-tel').value;
+            t.address = document.getElementById('edit-addr').value;
             saveDB(); render(); closeModal();
         }
     }
