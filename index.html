@@ -3,81 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>顧客リスト</title>
+    <title>顧客マップDB Pro - Sanctuary Ed.</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Shippori+Mincho:wght@400;500&display=swap" rel="stylesheet">
+
     <style>
-        /* --- デザイン定義（白ベース×赤アクセント / iPhoneフォント） --- */
+        /* --- デザイン定義 --- */
         :root {
-            --primary: #cc3300; 
-            --bg: #F5F5F7; 
-            --card: #FFFFFF; 
-            --text-main: #1C1C1E; 
-            --text-sub: #8E8E93; 
-            --tag-bg: #EFEBE4;
-            --tag-text: #5D5548;
-            --radius: 12px;
-            /* iPhone標準フォント */
-            --font-base: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
-        }
-        body { font-family: var(--font-base); background-color: var(--bg); color: var(--text-main); margin: 0; padding: 0; height: 100vh; overflow-y: auto; -webkit-tap-highlight-color: transparent; }
-
-        .app-container { display: flex; flex-direction: column; height: 100%; max-width: 1600px; margin: 0 auto; padding: 15px; box-sizing: border-box; gap: 15px; }
-        @media (min-width: 900px) {
-            body { overflow: hidden; }
-            .app-container { flex-direction: row; padding: 20px; }
-            .left-section { flex: 2; display: flex; flex-direction: column; gap: 10px; height: 100%; }
-            .right-section { flex: 1; display: flex; flex-direction: column; height: 100%; min-width: 420px; overflow-y: auto; padding-right: 5px; }
-            .map-wrapper { flex: 1; border-radius: var(--radius); overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: relative; border: 1px solid rgba(0,0,0,0.05); }
-        }
-        @media (max-width: 899px) {
-            .app-container { display: block; padding: 10px; }
-            .map-wrapper { height: 50vh; min-height: 350px; border-radius: var(--radius); overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: relative; margin-bottom: 15px; border: 1px solid rgba(0,0,0,0.05); }
-            .right-section { padding-bottom: 100px; }
+            --bg: #f9f8f6;          /* 背景：生成り色 */
+            --card: #ffffff;        /* カード：白 */
+            --text-main: #2c2c2c;   /* 文字：墨色 */
+            --text-sub: #555555;    /* サブ文字：グレー */
+            --gold: #bfa37e;        /* アクセント：ゴールド */
+            --gold-light: #e6dccf;  /* 薄いゴールド */
+            --dark: #1a1a1a;        /* 締め色：黒に近いグレー */
+            --shadow: 0 10px 30px rgba(0,0,0,0.03);
+            --radius: 4px; 
+            --font-serif: 'Shippori Mincho', serif;
+            --font-eng: 'Cinzel', serif;
         }
 
-        .header-area { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        h1 { font-size: 1.3rem; font-weight: 800; margin: 0; }
-        .btn-settings { background: #fff; border: 1px solid #ccc; padding: 8px 12px; border-radius: 20px; font-size: 0.8rem; cursor: pointer; font-weight: 600; }
+        body { font-family: var(--font-serif); background-color: var(--bg); color: var(--text-main); margin: 0; padding: 0; height: 100vh; overflow-y: auto; -webkit-tap-highlight-color: transparent; letter-spacing: 0.05em; }
+        .app-container { display: flex; flex-direction: column; height: 100%; max-width: 1600px; margin: 0 auto; padding: 20px; box-sizing: border-box; gap: 20px; }
+        @media (min-width: 900px) { body { overflow: hidden; } .app-container { flex-direction: row; padding: 30px; } .left-section { flex: 2; display: flex; flex-direction: column; gap: 15px; height: 100%; } .right-section { flex: 1; display: flex; flex-direction: column; height: 100%; min-width: 420px; overflow-y: auto; padding-right: 5px; } .map-wrapper { flex: 1; border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); position: relative; border: 1px solid rgba(0,0,0,0.05); } }
+        @media (max-width: 899px) { .app-container { display: block; padding: 15px; } .map-wrapper { height: 50vh; min-height: 350px; border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); position: relative; margin-bottom: 20px; border: 1px solid rgba(0,0,0,0.05); } .right-section { padding-bottom: 100px; } }
 
-        .filter-area { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
-        select { width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #ddd; background: #fff; font-weight: 700; font-size: 0.85rem; appearance: none; text-align: center; }
-        .list-search-box { position: relative; margin-bottom: 15px; }
-        .list-search-box input { width: 100%; padding: 10px 10px 10px 35px; border-radius: 12px; border: 1px solid #ddd; background: #fff; font-size: 0.95rem; box-sizing: border-box; }
+        .header-area { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #e0e0e0; padding-bottom: 10px; }
+        h1 { font-family: var(--font-eng); font-size: 1.5rem; font-weight: 600; margin: 0; letter-spacing: 0.1em; }
+        .btn-settings { background: transparent; border: 1px solid var(--gold); padding: 8px 16px; border-radius: var(--radius); font-family: var(--font-serif); font-size: 0.8rem; cursor: pointer; color: var(--text-main); display: flex; align-items: center; gap: 6px; transition: 0.3s; }
+        .btn-settings:hover { background: var(--gold); color: #fff; }
 
-        /* --- 顧客カードデザイン --- */
-        .customer-item { 
-            background: var(--card); padding: 20px; border-radius: var(--radius); margin-bottom: 10px; 
-            display: flex; justify-content: space-between; align-items: center; border: 1px solid #eee;
-        }
-        .info-col-left { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+        .search-row { display: flex; gap: 10px; margin-bottom: 10px; }
+        .place-search-box { flex: 1; display: flex; align-items: center; background: var(--card); border-radius: var(--radius); padding: 4px 10px; box-shadow: var(--shadow); border: 1px solid rgba(0,0,0,0.05); }
+        .place-search-input { flex: 1; border: none; padding: 12px; font-size: 0.95rem; background: transparent; outline: none; font-family: var(--font-serif); }
+        .place-search-btn { background: none; border: none; font-size: 1rem; padding: 0 10px; color: var(--gold); cursor: pointer; }
+
+        .filter-area { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        select { width: 100%; padding: 12px; border-radius: var(--radius); border: 1px solid #ddd; background: var(--card); color: var(--text-main); font-family: var(--font-serif); font-size: 0.85rem; appearance: none; text-align: center; cursor: pointer; }
+        .list-search-box { position: relative; margin-bottom: 20px; }
+        .list-search-box input { width: 100%; padding: 14px 14px 14px 45px; border-radius: var(--radius); border: 1px solid #ddd; background: var(--card); font-size: 0.95rem; box-sizing: border-box; box-shadow: var(--shadow); font-family: var(--font-serif); transition: 0.3s; }
+        .list-search-icon { position: absolute; left: 15px; top: 14px; color: var(--gold); font-size: 1.1rem; }
+
+        #google-map-view { width: 100%; height: 100%; }
+        .btn-current-loc { position: absolute; bottom: 100px; right: 15px; z-index: 10; width: 40px; height: 40px; background: var(--card); border-radius: 50%; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: none; font-size: 1.2rem; color: var(--text-main); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .map-sync-wrapper { position: absolute; top: 15px; right: 15px; z-index: 10; background: rgba(255, 255, 255, 0.95); padding: 8px 16px; border-radius: var(--radius); box-shadow: 0 4px 12px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 10px; font-family: var(--font-serif); font-size: 0.8rem; }
+        .toggle-switch { position: relative; display: inline-block; width: 40px; height: 22px; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ddd; transition: .4s; border-radius: 22px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--gold); }
+        input:checked + .slider:before { transform: translateX(18px); }
+
+        #stats-area { background: var(--card); padding: 20px; border-radius: var(--radius); margin-bottom: 20px; box-shadow: var(--shadow); }
+        .stats-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #f0f0f0; padding-bottom: 10px;}
+        .stats-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+        .stats-item { font-size: 0.75rem; padding: 6px 14px; background: #f4f4f4; border-radius: 2px; cursor: pointer; transition: all 0.3s; }
+        .stats-item.selected { background: var(--gold); color: #fff; }
+
+        .customer-item { background: var(--card); padding: 25px; border-radius: var(--radius); margin-bottom: 15px; display: flex; justify-content: space-between; align-items: flex-start; box-shadow: var(--shadow); border: 1px solid rgba(0,0,0,0.02); transition: transform 0.2s; }
+        .info-main { font-family: var(--font-serif); font-weight: 600; font-size: 1.1rem; margin-bottom: 8px; line-height: 1.4; }
+        .info-sub { font-size: 0.85rem; color: var(--text-sub); margin-bottom: 5px; display: flex; align-items: center; gap: 10px; }
+        .tag { background: var(--gold-light); padding: 3px 8px; border-radius: 2px; font-size: 0.7rem; color: #5a4b35; }
         
-        .info-main { font-weight: 800; font-size: 1.05rem; display: flex; align-items: flex-start; line-height: 1.3; color: var(--text-main); }
-        .info-main::before { content: ''; display: inline-block; width: 8px; height: 8px; background: var(--primary); border-radius: 50%; margin-right: 10px; margin-top: 6px; flex-shrink: 0; }
+        .action-area { display: flex; flex-direction: column; gap: 10px; margin-left: 15px; }
+        .icon-btn { width: 44px; height: 44px; border-radius: 50%; background: #fcfcfc; border: 1px solid #eee; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 1.1rem; transition: all 0.3s; color: var(--text-main); }
+        .icon-btn:hover { background: var(--gold); color: #fff; }
 
-        .info-meta-row { display: flex; align-items: center; gap: 10px; margin-left: 18px; }
-        .tag-id { background: var(--tag-bg); color: var(--tag-text); padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700; font-family: monospace; }
-        .text-rep { font-size: 0.85rem; font-weight: 700; }
-
-        .info-address, .info-building { font-size: 0.85rem; color: var(--text-main); margin-left: 18px; line-height: 1.4; }
-        .info-building { font-weight: 700; }
-        .info-tel-row { font-size: 0.9rem; color: var(--text-sub); margin-left: 18px; display: flex; align-items: center; gap: 8px; }
-        .btn-copy-sm { font-size: 0.6rem; padding: 2px 6px; border: 1px solid #ccc; border-radius: 4px; background: #fff; color: #666; cursor: pointer; }
-
-        .action-col-right { display: flex; flex-direction: column; gap: 10px; margin-left: 10px; padding-left: 10px; border-left: 1px solid #f0f0f0; }
-        .circle-btn { width: 38px; height: 38px; border-radius: 50%; background: #fff; border: 1px solid #eee; display: flex; align-items: center; justify-content: center; text-decoration: none; cursor: pointer; transition: 0.2s; }
-        .circle-btn svg { width: 18px; height: 18px; fill: none; stroke: var(--primary); stroke-width: 2; }
-        .circle-btn.pin svg { fill: var(--primary); stroke: none; }
-
-        /* モーダル */
-        .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); backdrop-filter: blur(3px); display:none; justify-content:center; align-items:center; z-index:9999; }
-        .modal-content { background:#fff; padding:24px; border-radius:20px; width:90%; max-width:450px; max-height:85vh; overflow-y:auto; }
-        .settings-section { border: 1px solid #f0f0f0; padding: 12px; border-radius: 10px; margin-bottom: 15px; }
-        label { display: block; font-size: 0.75rem; font-weight: bold; color: #888; margin-bottom: 5px; margin-top: 10px; }
-        input[type="text"], input[type="password"], textarea { width: 100%; padding: 12px; border: 1px solid #eee; background: #FAFAFA; border-radius: 10px; box-sizing: border-box; font-size: 16px; }
-        .btn-main { width: 100%; padding: 14px; background: #333; color: #fff; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; margin-top: 15px; }
-        .btn-sub { padding: 10px; background: #F2F2F7; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 0.85rem; }
-        .btn-del { width: 100%; margin-top: 20px; padding: 12px; background: #FFF0F0; color: #FF3B30; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
-        .quick-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px; }
-        .chip { font-size: 0.75rem; background: #f0f0f5; padding: 4px 10px; border-radius: 15px; cursor: pointer; border: 1px solid #ddd; }
+        .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(44, 44, 44, 0.7); backdrop-filter: blur(5px); display:none; justify-content:center; align-items:center; z-index:9999; }
+        .modal-content { background: #fff; padding: 30px; border-radius: 2px; width: 95%; max-width: 600px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+        .settings-section { border-bottom: 1px solid #f0f0f0; padding-bottom: 25px; margin-bottom: 25px; }
+        label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--gold); margin-bottom: 8px; margin-top: 15px; font-family: var(--font-eng); }
+        input[type="text"], input[type="password"], textarea { width: 100%; padding: 12px; border: 1px solid #ddd; background: #fff; border-radius: var(--radius); box-sizing: border-box; font-size: 16px; font-family: var(--font-serif); }
+        .btn-main { width: 100%; padding: 16px; background: var(--dark); color: #fff; border: none; border-radius: var(--radius); font-weight: 500; cursor: pointer; margin-top: 20px; font-family: var(--font-eng); }
+        .btn-sub { padding: 10px; background: #fff; border: 1px solid #ddd; border-radius: var(--radius); font-weight: 500; cursor: pointer; font-size: 0.8rem; }
+        .btn-del { width: 100%; margin-top: 30px; padding: 12px; background: transparent; color: #999; border: 1px solid #eee; border-radius: var(--radius); cursor: pointer; font-size: 0.8rem; }
     </style>
 </head>
 <body>
@@ -85,119 +84,93 @@
 <div class="app-container">
     <div class="left-section">
         <div class="search-row">
-            <div class="place-search-box" style="display:flex; flex:1; align-items:center; background:#fff; border-radius:12px; padding:2px 5px;">
-                <input type="text" id="mapJumpInput" class="place-search-input" placeholder="地名で移動" style="flex:1; border:none; padding:10px; outline:none;">
-                <button onclick="searchMapLocation()" style="background:none; border:none; cursor:pointer; font-size:1.2rem;">🔍</button>
+            <div class="place-search-box">
+                <input type="text" id="mapJumpInput" class="place-search-input" placeholder="Area Search (e.g. Ginza)" onkeydown="if(event.key==='Enter')searchMapLocation()">
+                <button class="place-search-btn" onclick="searchMapLocation()">🔍</button>
             </div>
         </div>
         <div class="map-wrapper">
-            <div id="google-map-view" style="width:100%; height:100%;"></div>
-            <div id="map-placeholder-msg" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);">地図を準備中...</div>
-            <div style="position:absolute; top:10px; right:10px; background:rgba(255,255,255,0.9); padding:5px 10px; border-radius:20px; z-index:10; display:flex; align-items:center; gap:5px; font-size:0.75rem; font-weight:bold;">
-                <span>地図連動</span>
-                <input type="checkbox" id="mapSyncToggle" onchange="toggleMapSync()">
+            <div id="google-map-view"></div>
+            <div id="map-placeholder-msg" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);">Initializing Map...</div>
+            <div class="map-sync-wrapper">
+                <span>SYNC MAP</span>
+                <label class="toggle-switch"><input type="checkbox" id="mapSyncToggle" onchange="toggleMapSync()"><span class="slider"></span></label>
             </div>
-            <button id="gpsBtn" onclick="toggleGPS()" style="position:absolute; bottom:20px; right:10px; width:44px; height:44px; border-radius:50%; background:#fff; border:none; box-shadow:0 2px 10px rgba(0,0,0,0.2); cursor:pointer; font-size:1.4rem;">◎</button>
+            <button class="btn-current-loc" id="gpsBtn" onclick="toggleGPS()">◎</button>
         </div>
     </div>
 
     <div class="right-section">
         <div class="header-area">
-            <h1>顧客リスト</h1>
-            <button class="btn-settings" onclick="openSettings()">⚙️ 設定</button>
+            <h1>顧客マップDB Pro</h1>
+            <button class="btn-settings" onclick="openSettings()">⚙️ SETTINGS</button>
         </div>
         <div class="filter-area">
-            <select id="prefFilter" onchange="resetAndRender()"><option value="ALL">都道府県: すべて</option></select>
-            <select id="stationFilter" onchange="resetAndRender()"><option value="ALL">最寄り駅: すべて</option></select>
+            <select id="prefFilter" onchange="resetAndRender()"><option value="ALL">PREFECTURE: ALL</option></select>
+            <select id="stationFilter" onchange="resetAndRender()"><option value="ALL">STATION: ALL</option></select>
         </div>
         <div class="list-search-box">
-            <input type="text" id="searchInput" placeholder="検索 (名前, Rコード...)" oninput="resetAndRender()" style="width:100%; padding:12px 12px 12px 40px; border-radius:12px; border:1px solid #ddd;">
+            <span class="list-search-icon">🔍</span>
+            <input type="text" id="searchInput" placeholder="Search by Name, ID..." oninput="resetAndRender()">
         </div>
-        <div id="stats-area" style="background:#fff; padding:12px; border-radius:12px; margin-bottom:15px; border:1px solid #eee;">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <div id="stats-total-text" style="font-weight:800;">-- 件</div>
-                <select id="limitSelect" onchange="changeLimit()" style="padding:2px;"><option value="100">表示: 100</option><option value="ALL">表示: 全件</option></select>
+        <div id="stats-area">
+            <div class="stats-header">
+                <div class="stats-total" id="stats-total-text">-- Results</div>
+                <select id="limitSelect" class="limit-select" onchange="changeLimit()"><option value="100">Show: 100</option><option value="ALL">Show: ALL</option></select>
             </div>
-            <div id="stats-detail" class="quick-chips"></div>
+            <div id="stats-detail" class="stats-grid"></div>
         </div>
         <div id="result-area"></div>
-        <button id="load-more-btn" style="width:100%; padding:12px; background:#fff; border:1px solid #ccc; border-radius:20px; display:none; cursor:pointer; margin-top:10px;" onclick="loadMore()">👇 さらに表示</button>
+        <button id="load-more-btn" style="width:100%; padding:15px; background:transparent; border:1px solid var(--gold); color:var(--gold); border-radius:30px; margin-top:20px; display:none;" onclick="loadMore()">VIEW MORE</button>
     </div>
 </div>
 
 <div id="settingsModal" class="modal-overlay">
     <div class="modal-content">
-        <h3>設定</h3>
+        <h3>SETTINGS</h3>
         <div class="settings-section">
-            <label>🔑 APIキー</label>
-            <div style="display:flex; gap:5px;"><input type="password" id="apiKey" placeholder="AIzaSy..."><button onclick="saveKeyAndInit()" class="btn-sub">保存</button></div>
+            <label>API KEY</label>
+            <div style="display:flex; gap:10px;"><input type="password" id="apiKey" style="flex:1;"><button onclick="saveKeyAndInit()" class="btn-sub">SAVE</button></div>
         </div>
         <div class="settings-section">
-            <label>📥 登録 (6列: ID|法人|店舗|ビル|住所|電話)</label>
-            <div style="display:flex; gap:10px; margin-bottom:10px;">
-                <label><input type="radio" name="regMode" value="new" checked onchange="changeRegMode()"> 新規登録</label>
-                <label><input type="radio" name="regMode" value="update" onchange="changeRegMode()"> ビル名更新</label>
-            </div>
-            <input type="text" id="repName" placeholder="担当者名" style="margin-bottom:5px;">
-            <textarea id="csvInput" style="height:80px;"></textarea>
-            <button class="btn-main" onclick="processData()" id="runBtn">実行</button>
-            <div style="display:flex; gap:10px; margin-top:10px;">
-                <button class="btn-sub" onclick="shareOrDownload()">💾 保存</button>
-                <button class="btn-sub" onclick="document.getElementById('fileInput').click()">📂 読込</button>
-                <input type="file" id="fileInput" accept=".json" style="display:none" onchange="uploadData(this)">
-            </div>
+            <label>📥 DATA IMPORT</label>
+            <div style="display:flex; gap:15px; margin-bottom:15px; background:#fcfcfc; padding:10px; border-radius:var(--radius);"><label><input type="radio" name="regMode" value="new" checked onchange="changeRegMode()"> NEW REG (6 Cols)</label><label><input type="radio" name="regMode" value="update" onchange="changeRegMode()"> UPDATE BLD (2 Cols)</label></div>
+            <div id="mode-new-area"><label>REP NAME</label><input type="text" id="repName"></div>
+            <label id="csv-label">DATA PASTE (6 Cols: ID|Corp|Shop|Building|Addr|Tel)</label>
+            <textarea id="csvInput" style="height:120px;"></textarea>
+            <button class="btn-main" id="runBtn" onclick="processData()">EXECUTE</button>
         </div>
         <div class="settings-section">
-            <label>📍 青ピンにする担当者</label>
-            <div id="rep-checklist" style="max-height:100px; overflow-y:auto;"></div>
+            <label>MY PINS (BLUE)</label><div id="rep-checklist" style="max-height:100px; overflow-y:auto;"></div>
         </div>
-        <div class="settings-section">
-            <label>📝 定型文チップ</label>
-            <div style="display:flex; gap:5px;"><input type="text" id="newChipInput"><button onclick="addChip()" class="btn-sub">追加</button></div>
-            <div id="settings-chip-list" class="quick-chips"></div>
-        </div>
-        <button class="btn-sub" style="width:100%; margin-top:10px;" onclick="document.getElementById('settingsModal').style.display='none'">閉じる</button>
-        <button class="btn-del" onclick="clearAll()">全データ削除</button>
+        <button class="btn-sub" style="width:100%; background:#f5f5f5;" onclick="document.getElementById('settingsModal').style.display='none'">CLOSE</button>
+        <button class="btn-del" onclick="clearAll()">DELETE ALL DATA</button>
     </div>
 </div>
 
 <div id="editModal" class="modal-overlay">
     <div class="modal-content">
-        <h3>編集</h3>
+        <h3>EDIT INFO</h3>
         <input type="hidden" id="edit-id">
-        <label>備考</label><textarea id="edit-note" style="height:60px;"></textarea>
-        <div id="edit-chip-area" class="quick-chips"></div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-            <div><label>Rコード</label><input type="text" id="edit-r"></div>
-            <div><label>担当</label><input type="text" id="edit-rep"></div>
-        </div>
-        <label>名称</label><input type="text" id="edit-name">
-        <label>住所</label><input type="text" id="edit-addr">
-        <label>ビル名</label><input type="text" id="edit-building">
-        <label>電話</label><input type="text" id="edit-tel">
-        <label>最寄り駅</label><input type="text" id="edit-station">
-        <div style="display:flex; gap:10px; margin-top:20px;">
-            <button class="btn-sub" style="flex:1;" onclick="closeModal()">キャンセル</button>
-            <button class="btn-main" style="flex:1; margin-top:0;" onclick="saveEdit()">保存</button>
-        </div>
-        <button class="btn-del" onclick="deleteCustomer()">削除</button>
+        <label>NOTE</label><textarea id="edit-note"></textarea>
+        <label>REP</label><input type="text" id="edit-rep">
+        <label>ID</label><input type="text" id="edit-r">
+        <label>NAME</label><input type="text" id="edit-name">
+        <label>BUILDING</label><input type="text" id="edit-building">
+        <label>TEL</label><input type="text" id="edit-tel">
+        <label>ADDRESS</label><input type="text" id="edit-addr">
+        <div style="display:flex; gap:15px; margin-top:30px;"><button class="btn-sub" style="flex:1;" onclick="closeModal()">CANCEL</button><button class="btn-main" style="flex:1; margin-top:0;" onclick="saveEdit()">SAVE</button></div>
     </div>
 </div>
 
 <script>
-    /* =======================================================
-      機能ロジック（最初に動いていたものに完全復元）
-      ======================================================= */
     const DB_NAME = "map_db"; 
-    let db = [], markers = [], targetReps = [], quickChips = ["不在", "移転", "完了"];
-    let map, geocoder, AdvancedMarkerElement, myLocationMarker = null, watchId = null, mapSyncMode = false, currentLimit = 100, isTrackingLocked = false, isPinClick = false;
+    let db = [], markers = [], targetReps = [], mapSyncMode = false, currentLimit = 100;
+    let map, geocoder, AdvancedMarkerElement, myLocationMarker = null, watchId = null, isPinClick = false;
 
     window.onload = () => {
         const k = localStorage.getItem('map_apiKey'), d = localStorage.getItem(DB_NAME);
-        const tr = localStorage.getItem('map_target_reps_json'), qc = localStorage.getItem('map_quick_chips_json');
         if(d) db = JSON.parse(d);
-        if(tr) targetReps = JSON.parse(tr);
-        if(qc) quickChips = JSON.parse(qc);
         if(k) { document.getElementById('apiKey').value = k; initSystem(k); }
         populateFilters(); resetAndRender();
     };
@@ -223,52 +196,28 @@
     function render() {
         const area = document.getElementById('result-area'); area.innerHTML = "";
         const fPref = document.getElementById('prefFilter').value;
-        const fStat = document.getElementById('stationFilter').value;
         const q = normalize(document.getElementById('searchInput').value);
-
         let filtered = db.filter(d => {
             if(fPref !== "ALL" && !d.address.includes(fPref)) return false;
-            if(fStat !== "ALL" && (d.station || "未設定") !== fStat) return false;
             if(!q) return true;
             return normalize(d.name + d.r_code + d.address + (d.building||"")).includes(q);
         });
-
         if(mapSyncMode && map) {
             const center = map.getCenter();
-            filtered.forEach(d => { if(d.lat) d._dist = google.maps.geometry.spherical.computeDistanceBetween(center, new google.maps.LatLng(d.lat, d.lng)); });
+            filtered.forEach(d => d._dist = google.maps.geometry.spherical.computeDistanceBetween(center, new google.maps.LatLng(d.lat, d.lng)));
             filtered.sort((a, b) => a._dist - b._dist);
         }
-
-        const displayTargets = filtered.slice(0, currentLimit);
-        updateMapPins(displayTargets);
-
-        displayTargets.forEach(c => {
+        updateMapPins(filtered.slice(0, currentLimit));
+        filtered.slice(0, currentLimit).forEach(c => {
             const div = document.createElement('div'); div.className = 'customer-item';
             div.innerHTML = `
-                <div class="info-col-left">
-                    <div class="info-main">${c.name}</div>
-                    <div class="info-meta-row">
-                        <span class="tag-id">${c.r_code || ""}</span>
-                        <span class="text-rep">${c.rep_name || ""}</span>
-                    </div>
-                    <div class="info-address">${c.address}</div>
-                    <div class="info-building">${c.building || ""}</div>
-                    <div class="info-tel-row">
-                        <span class="tel-number">${c.tel || ""}</span>
-                        <button class="btn-copy-sm" onclick="copyToClipboard('${c.tel}')">コピー</button>
-                    </div>
-                    ${c.note ? `<div style="margin-left:18px; font-size:0.75rem; color:var(--primary);">📝 ${c.note}</div>` : ''}
-                </div>
-                <div class="action-col-right">
-                    <a href="tel:${c.tel}" class="circle-btn"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg></a>
-                    <button onclick="panToMap(${c.lat},${c.lng})" class="circle-btn pin"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path></svg></button>
-                    <button onclick="openEdit('${c.id}')" class="circle-btn">✏️</button>
-                </div>`;
+                <div style="flex:1;"><div class="info-main">${c.name}</div><div class="info-sub"><span class="tag">${c.r_code||""}</span>${c.rep_name||""}</div><div class="info-sub">${c.address}</div><div class="info-sub" style="font-weight:600;">${c.building||""}</div><div class="info-sub">${c.tel||""}</div></div>
+                <div class="action-area"><a href="tel:${c.tel}" class="icon-btn">📞</a><button onclick="panToMap(${c.lat},${c.lng})" class="icon-btn">📍</button><button onclick="openEdit('${c.id}')" class="icon-btn">✏️</button></div>`;
             area.appendChild(div);
         });
-        document.getElementById('stats-total-text').innerText = `${filtered.length}件`;
+        document.getElementById('stats-total-text').innerText = `${filtered.length} Results`;
         document.getElementById('load-more-btn').style.display = (filtered.length > currentLimit) ? 'block' : 'none';
-        updateRepStats(filtered);
+        updateStatsUI(filtered);
     }
 
     function updateMapPins(targets) {
@@ -276,8 +225,7 @@
         markers.forEach(m => m.setMap(null)); markers = [];
         targets.forEach(c => {
             if(!c.lat) return;
-            const pin = document.createElement("div");
-            pin.style.width="14px"; pin.style.height="14px"; pin.style.borderRadius="50%"; pin.style.border="2px solid white";
+            const pin = document.createElement("div"); pin.style.width="14px"; pin.style.height="14px"; pin.style.borderRadius="50%"; pin.style.border="2px solid white";
             pin.style.backgroundColor = targetReps.includes(c.rep_name) ? "#2196F3" : "#cc3300";
             const m = new AdvancedMarkerElement({ position:{lat:c.lat, lng:c.lng}, map:map, content:pin });
             m.addListener('click', () => { isPinClick=true; new google.maps.InfoWindow({ content: `<b>${c.name}</b><br>${c.building||''}` }).open(map, m); });
@@ -285,104 +233,40 @@
         });
     }
 
-    function toggleGPS() {
-        if (watchId) { navigator.geolocation.clearWatch(watchId); watchId = null; isTrackingLocked = false; if(myLocationMarker) myLocationMarker.setMap(null); } 
-        else {
-            isTrackingLocked = true;
-            watchId = navigator.geolocation.watchPosition(pos => {
-                const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-                if (!myLocationMarker) myLocationMarker = new AdvancedMarkerElement({ map: map, position: loc, content: document.createElement("div") });
-                myLocationMarker.position = loc;
-                if (isTrackingLocked) map.panTo(loc);
-            }, null, { enableHighAccuracy: true });
-        }
-    }
-
-    function panToMap(lat, lng) { 
-        map.setZoom(17); map.panTo({lat, lng}); 
-        if(!document.getElementById('mapSyncToggle').checked){ document.getElementById('mapSyncToggle').checked = true; toggleMapSync(); }
-        if(window.innerWidth < 900) window.scrollTo({top:0, behavior:'smooth'});
-    }
-
-    function openEdit(id) {
-        const d = db.find(x => x.id === id); if(!d) return;
-        document.getElementById('edit-id').value = d.id;
-        document.getElementById('edit-note').value = d.note || "";
-        document.getElementById('edit-r').value = d.r_code || "";
-        document.getElementById('edit-rep').value = d.rep_name || "";
-        document.getElementById('edit-name').value = d.name || "";
-        document.getElementById('edit-addr').value = d.address || "";
-        document.getElementById('edit-building').value = d.building || "";
-        document.getElementById('edit-tel').value = d.tel || "";
-        document.getElementById('edit-station').value = d.station || "";
-        const chipArea = document.getElementById('edit-chip-area'); chipArea.innerHTML = "";
-        quickChips.forEach(c => { const s = document.createElement('span'); s.className='chip'; s.innerText=c; s.onclick=()=>addNote(c); chipArea.appendChild(s); });
-        document.getElementById('editModal').style.display='flex';
-    }
-
     async function processData() {
         const mode = document.querySelector('input[name="regMode"]:checked').value;
         const csv = document.getElementById('csvInput').value.trim();
-        if(!csv) return alert("データを貼り付けてください");
-        const lines = csv.split('\n');
+        if(!csv) return alert("Paste data first");
         if (mode === 'update') {
-            lines.forEach(l => { const c = l.split('\t'); const t = db.find(x => x.r_code === c[0]); if(t) t.building = c[1]; });
+            csv.split('\n').forEach(l => { const c = l.split('\t'); const t = db.find(x => x.r_code === c[0]); if(t) t.building = c[1]; });
         } else {
             const rep = document.getElementById('repName').value;
-            for(let l of lines) {
+            for(let l of csv.split('\n')) {
                 const c = l.split('\t'); if(c.length < 5) continue;
                 let r=c[0], n=(c[1]+" "+c[2]).trim(), b=c[3], a=c[4], t=c[5]||"";
                 if(c.length === 5){ b=""; a=c[3]; t=c[4]; }
                 try {
                     const res = await new Promise((res, rej) => geocoder.geocode({address: a}, (r, s) => s==='OK'?res(r[0].geometry.location):rej()));
-                    db.push({ id: Math.random().toString(36).substr(2, 9), r_code: r, name: n, building: b, address: a, tel: t, station: "", lat: res.lat(), lng: res.lng(), rep_name: rep, note: "" });
+                    db.push({ id: Math.random().toString(36).substr(2, 9), r_code: r, name: n, building: b, address: a, tel: t, lat: res.lat(), lng: res.lng(), rep_name: rep, note: "" });
                 } catch(e){}
                 await new Promise(r => setTimeout(r, 400));
             }
         }
-        saveDB(); populateFilters(); resetAndRender(); alert("完了");
+        saveDB(); populateFilters(); render(); alert("Done");
     }
 
-    function updateRepStats(filtered) {
-        const counts = {}; filtered.forEach(d => counts[d.rep_name||"不明"] = (counts[d.rep_name||"不明"]||0)+1);
-        const area = document.getElementById('stats-detail'); area.innerHTML = "";
-        Object.keys(counts).sort().forEach(k => {
-            const s = document.createElement('span'); s.className = `stats-item ${activeReps.has(k)?'selected':''}`;
-            s.innerText = `${k}: ${counts[k]}`; s.onclick = () => { if(activeReps.has(k)) activeReps.delete(k); else activeReps.add(k); render(); };
-            area.appendChild(s);
-        });
-    }
-
-    function populateFilters() {
-        const pSel=document.getElementById('prefFilter'), sSel=document.getElementById('stationFilter');
-        pSel.innerHTML='<option value="ALL">都道府県: すべて</option>';
-        sSel.innerHTML='<option value="ALL">最寄り駅: すべて</option>';
-        [...new Set(db.map(x => x.address.match(/(...??[都道府県])/)?.[1] || "他"))].sort().forEach(x => { const o = document.createElement('option'); o.value=x; o.innerText=x; pSel.appendChild(o); });
-        [...new Set(db.map(x=>x.station||"未設定"))].sort().forEach(s=>{ if(s!=="未設定"){ const o=document.createElement('option'); o.value=s; o.innerText=s; sSel.appendChild(o); } });
-    }
-
+    function panToMap(lat, lng) { map.setZoom(17); map.panTo({lat, lng}); if(!document.getElementById('mapSyncToggle').checked){ document.getElementById('mapSyncToggle').checked=true; toggleMapSync(); } }
     function normalize(s) { return (s||"").replace(/[Ａ-Ｚａ-ｚ０-９]/g, c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0)).toLowerCase().replace(/\s+/g,""); }
     function saveKeyAndInit() { localStorage.setItem('map_apiKey', document.getElementById('apiKey').value); location.reload(); }
-    function saveDB() { localStorage.setItem(DB_NAME, JSON.stringify(db)); localStorage.setItem('map_target_reps_json', JSON.stringify(targetReps)); localStorage.setItem('map_quick_chips_json', JSON.stringify(quickChips)); }
+    function saveDB() { localStorage.setItem(DB_NAME, JSON.stringify(db)); }
     function closeModal() { document.getElementById('editModal').style.display='none'; }
     function changeLimit() { currentLimit = document.getElementById('limitSelect').value === 'ALL' ? db.length : 100; render(); }
     function toggleMapSync() { mapSyncMode = document.getElementById('mapSyncToggle').checked; render(); }
-    function searchMapLocation() { const v = document.getElementById('mapJumpInput').value; if(v && geocoder) geocoder.geocode({address: v}, r => { if(r) map.setCenter(r[0].geometry.location); }); }
-    function copyToClipboard(t) { navigator.clipboard.writeText(t).then(() => alert("コピーしました")); }
-    function saveEdit() {
-        const id = document.getElementById('edit-id').value; const t = db.find(x => x.id === id);
-        if(t){ t.note = document.getElementById('edit-note').value; t.r_code = document.getElementById('edit-r').value; t.rep_name = document.getElementById('edit-rep').value; t.name = document.getElementById('edit-name').value; t.address = document.getElementById('edit-addr').value; t.building = document.getElementById('edit-building').value; t.tel = document.getElementById('edit-tel').value; t.station = document.getElementById('edit-station').value; }
-        saveDB(); populateFilters(); render(); closeModal();
-    }
-    function deleteCustomer() { if(confirm("削除しますか？")){ db = db.filter(x => x.id !== document.getElementById('edit-id').value); saveDB(); render(); closeModal(); } }
-    function shareOrDownload() { const b = new Blob([JSON.stringify(db)], {type:'application/json'}); const a = document.createElement('a'); a.href=URL.createObjectURL(b); a.download='map_data.json'; a.click(); }
-    function uploadData(i) { const f=i.files[0]; if(!f)return; const r=new FileReader(); r.onload=e=>{ db=JSON.parse(e.target.result); saveDB(); populateFilters(); render(); alert("読み込み完了"); }; r.readAsText(f); }
-    function clearAll() { if(confirm("データをすべて削除しますか？")){ localStorage.removeItem(DB_NAME); location.reload(); } }
-    function changeRegMode() { const m = document.querySelector('input[name="regMode"]:checked').value; document.getElementById('mode-new-area').style.display = m==='new'?'block':'none'; }
-    function addChip() { const v = document.getElementById('newChipInput').value; if(v){ quickChips.push(v); saveDB(); document.getElementById('newChipInput').value=""; renderChipsSettings(); } }
-    function renderChipsSettings() { const a = document.getElementById('settings-chip-list'); a.innerHTML = ""; quickChips.forEach((c,i) => { const s = document.createElement('span'); s.className='chip'; s.innerHTML=`${c} <span onclick="quickChips.splice(${i},1);saveDB();renderChipsSettings()" style="color:red;margin-left:5px;cursor:pointer;">×</span>`; a.appendChild(s); }); }
-    function resetAndRender() { render(); }
-    function loadMore() { currentLimit += 100; render(); }
+    function openSettings() { document.getElementById('settingsModal').style.display='flex'; }
+    function openEdit(id) { const d = db.find(x => x.id === id); if(d) { document.getElementById('edit-id').value=d.id; document.getElementById('edit-note').value=d.note; document.getElementById('edit-r').value=d.r_code; document.getElementById('edit-rep').value=d.rep_name; document.getElementById('edit-name').value=d.name; document.getElementById('edit-building').value=d.building; document.getElementById('edit-tel').value=d.tel; document.getElementById('edit-addr').value=d.address; document.getElementById('editModal').style.display='flex'; } }
+    function saveEdit() { const id = document.getElementById('edit-id').value; const t = db.find(x => x.id === id); if(t){ t.note = document.getElementById('edit-note').value; t.r_code = document.getElementById('edit-r').value; t.rep_name = document.getElementById('edit-rep').value; t.name = document.getElementById('edit-name').value; t.address = document.getElementById('edit-addr').value; t.building = document.getElementById('edit-building').value; t.tel = document.getElementById('edit-tel').value; } saveDB(); render(); closeModal(); }
+    function populateFilters() { const p = document.getElementById('prefFilter'); p.innerHTML = '<option value="ALL">PREFECTURE: ALL</option>'; [...new Set(db.map(x => x.address.match(/(...??[都道府県])/)?.[1] || "Other"))].sort().forEach(x => { const o = document.createElement('option'); o.value=x; o.innerText=x; p.appendChild(o); }); }
+    function updateStatsUI(filtered) { const counts = {}; filtered.forEach(d => counts[d.rep_name||"Unknown"] = (counts[d.rep_name||"Unknown"]||0)+1); const area = document.getElementById('stats-detail'); area.innerHTML = ""; Object.keys(counts).forEach(k => { const s = document.createElement('span'); s.className = 'stats-item'; s.innerText = `${k}: ${counts[k]}`; area.appendChild(s); }); }
 </script>
 </body>
 </html>
