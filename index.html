@@ -90,14 +90,15 @@
         select:focus { border-color: var(--gold); outline: none; }
 
         .list-search-box { position: relative; margin-bottom: 20px; }
+        /* ★修正: padding-leftを増やしてアイコン被りを解消 */
         .list-search-box input { 
-            width: 100%; padding: 12px 12px 12px 40px; border-radius: var(--radius); 
+            width: 100%; padding: 12px 12px 12px 50px; border-radius: var(--radius); 
             border: 1px solid var(--border); background: var(--card); font-size: 0.95rem; 
             box-sizing: border-box; box-shadow: var(--shadow); font-family: var(--font-serif);
             transition: 0.3s;
         }
         .list-search-box input:focus { border-color: var(--gold); }
-        .list-search-icon { position: absolute; left: 12px; top: 13px; color: var(--text-sub); pointer-events: none; }
+        .list-search-icon { position: absolute; left: 15px; top: 13px; color: var(--text-sub); pointer-events: none; }
 
         /* マップ関連 */
         #map-area { background: #E5E5EA; width: 100%; height: 100%; }
@@ -122,6 +123,10 @@
             font-family: var(--font-serif); font-size: 0.8rem; color: var(--text-main); 
             border: 1px solid rgba(0,0,0,0.05);
         }
+        /* ★修正: スマホ時は左上に移動して、吹き出し(中央〜右上)との干渉を避ける */
+        @media (max-width: 899px) {
+            .map-sync-wrapper { top: 15px; left: 15px; right: auto; }
+        }
         
         /* トグルスイッチ */
         .toggle-switch { position: relative; display: inline-block; width: 40px; height: 22px; }
@@ -137,7 +142,8 @@
             margin-bottom: 20px; box-shadow: var(--shadow); 
         }
         .stats-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #f0f0f0; padding-bottom: 10px;}
-        .stats-total { font-family: var(--font-eng); font-weight: 600; font-size: 1rem; color: var(--text-main); }
+        /* ★修正: 文字が2列にならないように調整 */
+        .stats-total { font-family: var(--font-eng); font-weight: 600; font-size: 0.95rem; color: var(--text-main); white-space: nowrap; }
         
         .limit-select { 
             padding: 4px 10px; border-radius: var(--radius); border: 1px solid #ddd; 
@@ -514,6 +520,9 @@
     let watchId = null;
     let isTrackingLocked = false;
     let quickChips = ["不在", "移転", "商談中", "完了"];
+    
+    // ★機能追加: 選択された店舗IDを保持
+    let highlightedId = null;
       
     let db = [];
     let map, geocoder, AdvancedMarkerElement;
@@ -823,15 +832,24 @@
             const first = group[0];
             let isMe = group.some(c => targetReps.includes(c.rep_name));
             let isHit = group.some(c => hasSearch && normalize(c.name + c.r_code).includes(searchInput));
+            // ★機能追加: 選択中のピン判定
+            let isHighlighted = group.some(c => c.id === highlightedId);
             
             const pinView = document.createElement("div");
-            pinView.style.width = isHit ? "22px" : "16px";
+            pinView.style.width = (isHit || isHighlighted) ? "22px" : "16px";
             pinView.style.height = pinView.style.width;
-            pinView.style.backgroundColor = isHit ? "#FFD60A" : (isMe ? "#5d7ea3" : "#bf5b5b"); 
+            
+            // ★機能追加: ピンの色分けロジック (選択中 > 検索ヒット > 自分 > その他)
+            let bgColor = "#bf5b5b";
+            if(isHighlighted) bgColor = "#FFD60A";
+            else if(isHit) bgColor = "#FFD60A";
+            else if(isMe) bgColor = "#5d7ea3";
+            
+            pinView.style.backgroundColor = bgColor; 
             pinView.style.borderRadius = "50%"; pinView.style.border = "2px solid white"; pinView.style.boxShadow = "0 2px 5px rgba(0,0,0,0.2)";
-            if(hasSearch && !isHit) pinView.style.opacity = "0.6";
+            if(hasSearch && !isHit && !isHighlighted) pinView.style.opacity = "0.6";
 
-            const m = new AdvancedMarkerElement({ position: {lat:first.lat, lng:first.lng}, map: map, content: pinView, zIndex: isHit ? 1000 : (isMe ? 100 : 1) });
+            const m = new AdvancedMarkerElement({ position: {lat:first.lat, lng:first.lng}, map: map, content: pinView, zIndex: (isHit || isHighlighted) ? 1000 : (isMe ? 100 : 1) });
             
             m.addListener("click", () => {
                 isPinClick = true;
@@ -970,7 +988,7 @@
                     <svg class="svg-icon" viewBox="0 0 24 24"><path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 0 0-1.01.24l-2.2 2.2a15.053 15.053 0 0 1-6.59-6.59l2.2-2.21c.28-.26.36-.65.25-1.01A11.36 11.36 0 0 1 8.5 4c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1 0 9.39 7.61 17 17 17 .55 0 1-.45 1-1v-3.5c0-.55-.45-1-1-1z"/></svg>
                     発信
                 </a>
-                <button onclick="panToMap(${c.lat},${c.lng})" class="action-btn">
+                <button onclick="panToMap('${c.id}', ${c.lat},${c.lng})" class="action-btn">
                     <svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
                     地図
                 </button>
@@ -981,7 +999,10 @@
         btnArea.style.display = (targets.length > currentLimit && document.getElementById('limitSelect').value !== 'ALL') ? 'block' : 'none';
     }
 
-    function panToMap(lat, lng) { 
+    // ★機能追加: IDを受け取り、強調表示変数をセットして再描画
+    function panToMap(id, lat, lng) { 
+        highlightedId = id; // 強調IDセット
+
         map.setZoom(17); 
         map.panTo({lat, lng}); 
         
@@ -989,6 +1010,9 @@
         if(!toggle.checked) {
             toggle.checked = true;
             toggleMapSync(); 
+        } else {
+            // 既に連動モードの場合は即座に再描画してピンの色を更新
+            render();
         }
 
         if(window.innerWidth < 900) document.querySelector('.left-section').scrollIntoView({behavior:'smooth', block:'start'}); 
