@@ -14,19 +14,19 @@
             --bg: #f9f8f6;          /* 背景：生成り色 */
             --card: #ffffff;        /* カード：白 */
             --text-main: #2c2c2c;   /* 文字：墨色 */
-            --text-sub: #555555;    /* サブ文字：少し濃いめのグレー */
+            --text-sub: #6e6e6e;    /* サブ文字：グレー */
             --gold: #bfa37e;        /* アクセント：ゴールド */
             --gold-light: #e6dccf;  /* 薄いゴールド */
             --dark: #1a1a1a;        /* 締め色：黒に近いグレー */
             
             /* 機能色 */
             --primary: #bfa37e;     
-            --accent-blue: #5d7ea3; /* 青ピン */
-            --accent-red: #bf5b5b;  /* 赤ピン */
+            --accent-blue: #5d7ea3; /* 青ピンの代わり（落ち着いた藍色） */
+            --accent-red: #bf5b5b;  /* 赤ピンの代わり（落ち着いた赤） */
 
             /* デザイン要素 */
             --shadow: 0 10px 30px rgba(0,0,0,0.03);
-            --radius: 4px; 
+            --radius: 4px; /* 角丸を小さくしてシックに */
             --font-serif: 'Shippori Mincho', serif;
             --font-eng: 'Cinzel', serif;
         }
@@ -168,38 +168,33 @@
         
         .info-main { 
             font-family: var(--font-serif); font-weight: 600; font-size: 1.1rem; 
-            margin-bottom: 10px; color: var(--text-main); line-height: 1.4;
+            margin-bottom: 8px; color: var(--text-main); line-height: 1.4;
         }
-        .info-sub { 
-            font-size: 0.85rem; 
-            color: var(--text-sub); 
-            margin-bottom: 6px; 
-            display: flex; align-items: center; gap: 10px; 
-            line-height: 1.5;
-            letter-spacing: 0.08em;
-        }
+        .info-sub { font-size: 0.85rem; color: var(--text-sub); margin-bottom: 5px; display: flex; align-items: center; gap: 10px; }
         
         .tag { 
             background: var(--gold-light); padding: 3px 8px; border-radius: 2px; 
-            font-size: 0.75rem; color: #5a4b35; letter-spacing: 0.05em; margin-right: 5px;
+            font-size: 0.7rem; color: #5a4b35; letter-spacing: 0.05em;
         }
         
-        .action-area { display: flex; flex-direction: column; gap: 12px; margin-left: 15px; padding-top: 5px;}
+        .action-area { display: flex; flex-direction: column; gap: 10px; margin-left: 15px; }
         .icon-btn { 
             width: 44px; height: 44px; border-radius: 50%; background: #fcfcfc; border: 1px solid #eee;
             display: flex; align-items: center; justify-content: center; 
             text-decoration: none; font-size: 1.1rem; transition: all 0.3s; color: var(--text-main);
         }
         .icon-btn:hover { background: var(--gold); color: #fff; border-color: var(--gold); }
-        
+        .icon-btn.call { color: var(--text-main); } 
+        .icon-btn.map { color: var(--text-main); }
+
         .btn-copy { 
-            font-size: 0.65rem; background: transparent; border: 1px solid #ccc; 
-            padding: 2px 6px; border-radius: 2px; cursor: pointer; color: #888;
-            transition: 0.3s; margin-left: 5px;
+            font-size: 0.7rem; background: transparent; border: 1px solid #ddd; 
+            padding: 2px 8px; border-radius: 2px; cursor: pointer; color: #999;
+            transition: 0.3s;
         }
         .btn-copy:hover { border-color: var(--gold); color: var(--gold); }
 
-        /* モーダル内の登録フォーム */
+        /* モーダル内の登録フォーム用 */
         .mode-switch {
             display: flex; gap: 15px; margin-bottom: 15px; background: #fcfcfc; padding: 10px; border-radius: var(--radius); border: 1px solid #eee;
         }
@@ -272,7 +267,7 @@
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         .modal-content { 
-            background: #fff; padding: 30px; border-radius: 2px; width: 95%; max-width: 600px; 
+            background: #fff; padding: 30px; border-radius: 2px; width: 95%; max-width: 600px; /* 広めに変更 */
             max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.2); 
             position: relative;
         }
@@ -461,7 +456,6 @@
         <label>BUILDING</label><input type="text" id="edit-building">
         <label>TEL</label><input type="text" id="edit-tel">
         <label>ADDRESS</label><input type="text" id="edit-addr">
-        <label>STATION</label><input type="text" id="edit-station">
         <div style="display:flex; gap:15px; margin-top:30px;">
             <button class="btn-sub" style="flex:1;" onclick="closeModal()">CANCEL</button>
             <button class="btn-main" style="flex:1; margin-top:0;" onclick="saveEdit()">SAVE</button>
@@ -821,9 +815,7 @@
     function populateFilters() {
         const pSel=document.getElementById('prefFilter'), sSel=document.getElementById('stationFilter');
         pSel.innerHTML='<option value="ALL">PREFECTURE: ALL</option>';
-        sSel.innerHTML='<option value="ALL">STATION: ALL</option>';
         [...new Set(db.map(x=>getPrefecture(x.address)))].sort().forEach(p=>{const o=document.createElement('option');o.value=p;o.innerText=p;pSel.appendChild(o)});
-        [...new Set(db.map(x=>x.station||"未特定"))].sort().forEach(s=>{const o=document.createElement('option');o.value=s;o.innerText=s;sSel.appendChild(o)});
     }
 
     function toggleMapSync() { mapSyncMode = document.getElementById('mapSyncToggle').checked; if(mapSyncMode) resetAndRender(); }
@@ -834,12 +826,10 @@
     function render() {
         const area = document.getElementById('result-area'); area.innerHTML = "";
         const fPref = document.getElementById('prefFilter').value;
-        const fStat = document.getElementById('stationFilter').value;
         const q = normalize(document.getElementById('searchInput').value);
 
         let filtered = db.filter(d => {
             if(fPref !== "ALL" && getPrefecture(d.address) !== fPref) return false;
-            if(fStat !== "ALL" && (d.station || "未特定") !== fStat) return false;
             if(!q) return true;
             return normalize(d.name + d.r_code + d.rep_name + d.address + (d.building||"")).includes(q);
         });
@@ -868,31 +858,11 @@
         displayTargets.forEach(c => {
             const isMe = targetReps.includes(c.rep_name);
             const color = isMe ? "#5d7ea3" : "#bf5b5b"; 
-            const buildHtml = c.building ? `<div class="info-sub">${c.building}</div>` : "";
-            const telHtml = c.tel ? `<div class="info-sub">${c.tel} <button class="btn-copy" onclick="copyToClipboard('${c.tel}')">COPY</button></div>` : "";
-
+            const buildHtml = c.building ? `<div style="font-weight:600; font-size:0.9rem; color:#444; margin-bottom:4px;">🏬 ${c.building}</div>` : "";
+            
             const div = document.createElement('div');
             div.className = 'customer-item';
-            
-            div.innerHTML = `
-                <div style="flex:1;">
-                    <div class="info-main">
-                        <span style="background:${color};width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:10px;vertical-align:middle;"></span>
-                        ${c.name}
-                    </div>
-                    <div class="info-sub">
-                        <span class="tag">${c.r_code||"-"}</span>${c.rep_name||""}
-                    </div>
-                    <div class="info-sub">${c.address}</div>
-                    ${buildHtml}
-                    ${telHtml}
-                    <div style="font-size:0.75rem;color:#bfa37e;margin-top:6px;font-style:italic;">${c.note?'📝 '+c.note:''}</div>
-                </div>
-                <div class="action-area">
-                    <a href="tel:${c.tel}" class="icon-btn call">📞</a>
-                    <button onclick="panToMap(${c.lat},${c.lng})" class="icon-btn map">📍</button>
-                    <button onclick="openEdit('${c.id}')" class="icon-btn edit">✏️</button>
-                </div>`;
+            div.innerHTML = `<div style="flex:1;"><div class="info-main"><span style="background:${color};width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:10px;vertical-align:middle;"></span>${c.name}</div><div class="info-sub"><span class="tag">${c.r_code||"-"}</span>${c.rep_name||""}</div><div class="info-sub">📞 ${c.tel||""} <button class="btn-copy" onclick="copyToClipboard('${c.tel}')">COPY</button></div>${buildHtml}<div class="info-sub">${c.address}</div><div style="font-size:0.75rem;color:#bfa37e;margin-top:6px;font-style:italic;">${c.note?'📝 '+c.note:''}</div></div><div class="action-area"><a href="tel:${c.tel}" class="icon-btn call">📞</a><button onclick="panToMap(${c.lat},${c.lng})" class="icon-btn map">📍</button></div>`;
             area.appendChild(div);
         });
         const btnArea = document.getElementById('load-more-btn');
@@ -902,7 +872,13 @@
     function panToMap(lat, lng) { 
         map.setZoom(17); 
         map.panTo({lat, lng}); 
-        if(!document.getElementById('mapSyncToggle').checked) { document.getElementById('mapSyncToggle').checked = true; toggleMapSync(); }
+        
+        const toggle = document.getElementById('mapSyncToggle');
+        if(!toggle.checked) {
+            toggle.checked = true;
+            toggleMapSync(); 
+        }
+
         if(window.innerWidth < 900) document.querySelector('.left-section').scrollIntoView({behavior:'smooth', block:'start'}); 
     }
     
@@ -918,7 +894,6 @@
         document.getElementById('edit-building').value = d.building||"";
         document.getElementById('edit-tel').value = d.tel||""; 
         document.getElementById('edit-addr').value = d.address; 
-        document.getElementById('edit-station').value = d.station||"";
         
         const chipArea = document.getElementById('edit-chip-area');
         chipArea.innerHTML = "";
@@ -939,7 +914,6 @@
         db[idx].rep_name = document.getElementById('edit-rep').value;
         db[idx].name = document.getElementById('edit-name').value;
         db[idx].building = document.getElementById('edit-building').value;
-        db[idx].station = document.getElementById('edit-station').value;
         saveDB(); render(); closeModal(); 
     }
     function deleteCustomer() { if(confirm("Delete this customer?")) { db = db.filter(x => x.id !== document.getElementById('edit-id').value); saveDB(); render(); closeModal(); } }
