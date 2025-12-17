@@ -128,8 +128,10 @@
             cursor: pointer; color: var(--text-main); transition: 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.03);
         }
         .circle-btn:active { transform: scale(0.95); background: #f9f9f9; }
+        .circle-btn:hover { border-color: var(--accent-red); }
         .circle-btn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; }
         .circle-btn.red-icon svg { stroke: var(--accent-red); }
+        /* ピンの中身を塗りつぶし */
         .circle-btn.pin svg { fill: var(--accent-red); stroke: none; }
 
         /* マップ */
@@ -146,6 +148,7 @@
         input:checked + .slider:before { transform: translateX(12px); }
 
         #gpsBtn { position: absolute; bottom: 20px; right: 10px; width: 40px; height: 40px; border-radius: 50%; background: #fff; border: none; box-shadow: 0 2px 6px rgba(0,0,0,0.2); cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; z-index: 10; }
+        #gpsBtn.locked { background: var(--accent-red); color:white; }
 
         /* モーダル */
         .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:none; justify-content:center; align-items:center; z-index:9999; animation: fadeIn 0.3s ease; }
@@ -172,6 +175,14 @@
         #load-more-btn { width: 100%; padding: 12px; background: #fff; border: 1px solid #ccc; border-radius: 20px; cursor: pointer; margin-top: 10px; display: none; color: #555; font-weight: 600; }
         
         input, textarea { font-family: var(--font-base); }
+        
+        #map-placeholder-msg {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: rgba(255,255,255,0.95); padding: 20px; border-radius: 12px;
+            font-weight: 600; color: #333; pointer-events: auto;
+            text-align: center; width: 80%; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            font-size: 0.9rem; line-height: 1.6;
+        }
     </style>
 </head>
 <body>
@@ -262,7 +273,7 @@
                 <div class="data-tools" style="margin-top:10px;">
                     <button class="btn-sub" onclick="shareOrDownload()">💾 保存(JSON)</button>
                     <button class="btn-sub" onclick="document.getElementById('fileInput').click()">📂 読込(JSON)</button>
-                    <input type="file" id="fileInput" accept=".json" style="display:none" onchange="uploadData(this)">
+                    <input type="file" id="fileInput" accept=".json,application/json" style="display:none" onchange="uploadData(this)">
                 </div>
                 <button class="btn-del" onclick="clearAll()" style="margin-top:15px;">全データ削除</button>
                 <div id="log-area" style="font-size:0.75rem; color:#666; margin-top:5px; text-align:center;"></div>
@@ -344,9 +355,11 @@
     let targetReps = []; 
     let quickChips = ["不在", "移転", "商談中", "完了"];
     let db = [];
-    let map, geocoder;
+    let map, geocoder, AdvancedMarkerElement;
     let markers = [];
     let watchId = null;
+    let isTrackingLocked = false;
+    let myLocationMarker = null;
 
     window.onload = () => {
         const k = localStorage.getItem('map_apiKey');
@@ -356,7 +369,15 @@
         
         if(tr) { try { targetReps = JSON.parse(tr); } catch(e) { targetReps=[]; } }
         if(qc) { try { quickChips = JSON.parse(qc); } catch(e) {} }
-        if(d) { try { db = JSON.parse(d); populateFilters(); resetAndRender(); } catch(e){ db=[]; } }
+        
+        if(d) { 
+            try { 
+                db = JSON.parse(d); 
+                // 旧データの駅名補完
+                db.forEach(d => { if(!d.station && d.address) d.station = extractStation(d.address); });
+                populateFilters(); resetAndRender(); 
+            } catch(e){ db=[]; } 
+        }
         
         document.getElementById('current-db-name').innerText = DB_NAME;
 
@@ -368,16 +389,19 @@
         }
     };
 
+    // ★修正: 最初のコードと同じく AdvancedMarkerElement と marker ライブラリを使用
     async function initSystem(key) {
         if(window.google && window.google.maps && map) return;
         
         if(!document.querySelector('script[src*="maps.googleapis.com"]')) {
             await new Promise((resolve) => {
                 const s = document.createElement('script');
-                s.src = `https://maps.googleapis.com/maps/api/js?key=${key}&loading=async&libraries=places,geocoding`;
+                s.src = `https://maps.googleapis.com/maps/api/js?key=${key}&loading=async&libraries=places,geocoding,geometry,marker`;
                 s.async = true;
                 s.onload = resolve;
-                s.onerror = () => alert("Google Maps APIの読み込みに失敗しました。APIキーを確認してください。");
+                s.onerror = () => {
+                    document.getElementById('map-placeholder-msg').innerText = "スクリプト読込エラー: ネットワークまたはキーを確認";
+                };
                 document.head.appendChild(s);
             });
         }
@@ -385,10 +409,12 @@
         try {
             const { Map } = await google.maps.importLibrary("maps"); 
             const { Geocoder } = await google.maps.importLibrary("geocoding");
+            const { AdvancedMarkerElement: AM } = await google.maps.importLibrary("marker");
             geocoder = new Geocoder(); 
+            AdvancedMarkerElement = AM;
             
             map = new Map(document.getElementById('google-map-view'), { 
-                center:{lat:35.68, lng:139.76}, zoom:13, 
+                center:{lat:35.68, lng:139.76}, zoom:13, mapId: "DEMO_MAP_ID",
                 mapTypeControl: false, streetViewControl: false 
             });
             
@@ -397,7 +423,8 @@
             if(db.length > 0) render(); 
         } catch(e) { 
             console.error(e);
-            document.getElementById('map-placeholder-msg').innerText = "マップ読込エラー";
+            document.getElementById('map-placeholder-msg').innerHTML = 
+                `地図の読み込みに失敗しました。<br>エラー詳細: ${e.message}`;
         }
     }
 
@@ -484,30 +511,27 @@
     }
 
     function updateMapPins(targets) {
-        if(!map) return;
+        if(!map || !AdvancedMarkerElement) return;
         markers.forEach(m => m.setMap(null)); markers = [];
         
         targets.forEach(c => {
             if(!c.lat || !c.lng) return;
             const isMe = targetReps.includes(c.rep_name);
-            const color = isMe ? "#2196F3" : "#D32F2F"; 
-            const marker = new google.maps.Marker({
-                position: {lat:c.lat, lng:c.lng},
-                map: map,
-                title: c.name,
-                icon: {
-                    path: google.maps.SymbolPath.CIRCLE,
-                    scale: 7,
-                    fillColor: color,
-                    fillOpacity: 1,
-                    strokeColor: "white",
-                    strokeWeight: 2
-                }
+            
+            // ★AdvancedMarkerElementを使用 (元通り)
+            const pinView = document.createElement("div");
+            pinView.style.width = "14px";
+            pinView.style.height = "14px";
+            pinView.style.backgroundColor = isMe ? "#2196F3" : "#D32F2F";
+            pinView.style.border = "2px solid white";
+            pinView.style.borderRadius = "50%";
+            pinView.style.boxShadow = "0 2px 4px rgba(0,0,0,0.3)";
+
+            const m = new AdvancedMarkerElement({ position: {lat:c.lat, lng:c.lng}, map: map, content: pinView, title: c.name });
+            m.addListener("click", () => {
+                new google.maps.InfoWindow({ content: `<b>${c.name}</b><br>${c.building||""}` }).open(map, m);
             });
-            const infoContent = `<div style="font-weight:bold; color:#333;">${c.name}</div><div style="font-size:0.85rem;">${c.building||""}</div>`;
-            const infowindow = new google.maps.InfoWindow({ content: infoContent });
-            marker.addListener("click", () => infowindow.open(map, marker));
-            markers.push(marker);
+            markers.push(m);
         });
     }
 
@@ -543,20 +567,33 @@
         });
     }
 
+    function updateGpsBtnState() {
+        const btn = document.getElementById('gpsBtn');
+        btn.classList.remove('locked');
+        if (watchId && isTrackingLocked) { btn.classList.add('locked'); } 
+    }
+
     function toggleGPS() {
         if (!navigator.geolocation) return alert("位置情報が使えません");
-        if (watchId) { navigator.geolocation.clearWatch(watchId); watchId = null; alert("追跡停止"); } 
-        else {
+        if (!map) return;
+
+        if (watchId) {
+            if (isTrackingLocked) { navigator.geolocation.clearWatch(watchId); watchId = null; isTrackingLocked = false; if(myLocationMarker){myLocationMarker.setMap(null); myLocationMarker=null;} } 
+            else { isTrackingLocked = true; if(myLocationMarker) map.panTo(myLocationMarker.position); }
+        } else {
+            isTrackingLocked = true;
             watchId = navigator.geolocation.watchPosition((pos) => {
                 const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-                map.panTo(loc);
-                new google.maps.Marker({
-                    position: loc, map: map,
-                    icon: { path: google.maps.SymbolPath.CIRCLE, scale: 5, fillColor: "#4285F4", fillOpacity: 1, strokeColor: "white", strokeWeight: 2 }
-                });
+                if (myLocationMarker) { myLocationMarker.position = loc; } 
+                else {
+                    const pin = document.createElement("div"); pin.style.width="18px"; pin.style.height="18px"; pin.style.backgroundColor="#4285F4"; pin.style.border="3px solid white"; pin.style.borderRadius="50%";
+                    myLocationMarker = new AdvancedMarkerElement({ map: map, position: loc, content: pin, title: "現在地", zIndex: 999 });
+                }
+                if (isTrackingLocked) map.panTo(loc);
+                if (mapSyncMode) resetAndRender();
             }, null, {enableHighAccuracy:true});
-            alert("追跡開始");
         }
+        updateGpsBtnState();
     }
 
     function openSettings() {
@@ -689,7 +726,7 @@
                         id: Math.random().toString(36).substr(2),
                         r_code: r, name: name, building: b, address: a, tel: t,
                         station: st,
-                        lat: geo.lat, lng: geo.lng, rep_name: rep
+                        lat: geo.lat, lng: geo.lng, rep_name: rep, note: ""
                     });
                     cnt++;
                     document.getElementById('log-area').innerText = `${cnt}件 処理済`;
