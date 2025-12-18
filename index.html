@@ -74,11 +74,26 @@
         }
         .btn-settings:hover { border-color: var(--gold); color: var(--gold); }
 
-        /* 検索・フィルタエリア */
+        /* 検索・フィルタエリア（共通スタイル） */
         .search-row { display: flex; gap: 10px; margin-bottom: 10px; }
-        .place-search-box { flex: 1; display: flex; align-items: center; background: var(--card); border-radius: var(--radius); padding: 5px 12px; box-shadow: var(--shadow); border: 1px solid var(--border); }
-        .place-search-input { flex: 1; border: none; padding: 10px; font-size: 0.95rem; background: transparent; outline: none; font-family: var(--font-serif); }
-        .place-search-btn { background: none; border: none; padding: 0 5px; color: var(--gold); cursor: pointer; display: flex; align-items: center; }
+        
+        /* ★修正: 共通クラス化してデザインを統一 */
+        .search-box-style { 
+            display: flex; align-items: center; background: var(--card); 
+            border-radius: var(--radius); padding: 5px 12px; 
+            box-shadow: var(--shadow); border: 1px solid var(--border); 
+        }
+        .place-search-box { flex: 1; } /* エリア検索用 */
+        
+        .search-input-style { 
+            flex: 1; border: none; padding: 10px; font-size: 0.95rem; 
+            background: transparent; outline: none; font-family: var(--font-serif); 
+        }
+        
+        .search-btn-style { 
+            background: none; border: none; padding: 0 5px; 
+            color: var(--gold); cursor: pointer; display: flex; align-items: center; 
+        }
 
         .filter-area { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
         select { 
@@ -89,16 +104,8 @@
         }
         select:focus { border-color: var(--gold); outline: none; }
 
-        .list-search-box { position: relative; margin-bottom: 20px; }
-        /* ★修正: padding-leftを増やしてアイコン被りを解消 */
-        .list-search-box input { 
-            width: 100%; padding: 12px 12px 12px 50px; border-radius: var(--radius); 
-            border: 1px solid var(--border); background: var(--card); font-size: 0.95rem; 
-            box-sizing: border-box; box-shadow: var(--shadow); font-family: var(--font-serif);
-            transition: 0.3s;
-        }
-        .list-search-box input:focus { border-color: var(--gold); }
-        .list-search-icon { position: absolute; left: 15px; top: 13px; color: var(--text-sub); pointer-events: none; }
+        /* リスト検索ボックス（個別調整） */
+        .list-search-box { margin-bottom: 20px; } /* レイアウト用マージン */
 
         /* マップ関連 */
         #map-area { background: #E5E5EA; width: 100%; height: 100%; }
@@ -115,26 +122,31 @@
         .btn-current-loc.locked { background: var(--gold); color: white; }
         .btn-current-loc.unlocked { color: var(--gold); border: 1px solid var(--gold); }
         
+        /* ★修正: マップ連動ボタンを小さく調整 */
         .map-sync-wrapper { 
             position: absolute; top: 15px; right: 15px; z-index: 10; 
-            background: rgba(255, 255, 255, 0.95); padding: 8px 14px; 
+            background: rgba(255, 255, 255, 0.95); 
+            padding: 4px 10px; /* パディング縮小 */
             border-radius: var(--radius); box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
-            display: flex; align-items: center; gap: 10px; 
-            font-family: var(--font-serif); font-size: 0.8rem; color: var(--text-main); 
+            display: flex; align-items: center; gap: 8px; 
+            font-family: var(--font-serif); 
+            font-size: 0.75rem; /* フォントサイズ縮小 */
+            color: var(--text-main); 
             border: 1px solid rgba(0,0,0,0.05);
         }
-        /* ★修正: スマホ時は左上に移動して、吹き出し(中央〜右上)との干渉を避ける */
+        
+        /* スマホ時は左上に配置（干渉回避） */
         @media (max-width: 899px) {
             .map-sync-wrapper { top: 15px; left: 15px; right: auto; }
         }
         
-        /* トグルスイッチ */
-        .toggle-switch { position: relative; display: inline-block; width: 40px; height: 22px; }
+        /* トグルスイッチ（サイズ調整） */
+        .toggle-switch { position: relative; display: inline-block; width: 34px; height: 18px; } /* 少し小さく */
         .toggle-switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ddd; transition: .4s; border-radius: 22px; }
-        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+        .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
         input:checked + .slider { background-color: var(--gold); }
-        input:checked + .slider:before { transform: translateX(18px); }
+        input:checked + .slider:before { transform: translateX(16px); }
 
         /* 統計エリア */
         #stats-area { 
@@ -142,7 +154,6 @@
             margin-bottom: 20px; box-shadow: var(--shadow); 
         }
         .stats-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #f0f0f0; padding-bottom: 10px;}
-        /* ★修正: 文字が2列にならないように調整 */
         .stats-total { font-family: var(--font-eng); font-weight: 600; font-size: 0.95rem; color: var(--text-main); white-space: nowrap; }
         
         .limit-select { 
@@ -354,9 +365,9 @@
 <div class="app-container">
     <div class="left-section">
         <div class="search-row">
-            <div class="place-search-box">
-                <input type="text" id="mapJumpInput" class="place-search-input" placeholder="エリア検索 (例: 銀座)" onkeydown="if(event.key==='Enter')searchMapLocation()">
-                <button class="place-search-btn" onclick="searchMapLocation()">
+            <div class="place-search-box search-box-style">
+                <input type="text" id="mapJumpInput" class="place-search-input search-input-style" placeholder="エリア検索 (例: 銀座)" onkeydown="if(event.key==='Enter')searchMapLocation()">
+                <button class="place-search-btn search-btn-style" onclick="searchMapLocation()">
                     <svg class="svg-icon" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
                 </button>
             </div>
@@ -366,7 +377,7 @@
             <div id="google-map-view"></div>
             <div id="map-placeholder-msg">マップ読込中...</div>
             <div class="map-sync-wrapper">
-                <span>マップ連動</span>
+                <span>連動</span>
                 <label class="toggle-switch">
                     <input type="checkbox" id="mapSyncToggle" onchange="toggleMapSync()">
                     <span class="slider"></span>
@@ -392,11 +403,11 @@
             <select id="stationFilter" onchange="resetAndRender()"><option value="ALL">駅名: すべて</option></select>
         </div>
         
-        <div class="list-search-box">
-            <span class="list-search-icon">
+        <div class="list-search-box search-box-style">
+            <input type="text" id="searchInput" class="search-input-style" placeholder="名前、IDなどで検索..." oninput="resetAndRender()">
+            <button class="search-btn-style" style="pointer-events: none;">
                 <svg class="svg-icon" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
-            </span>
-            <input type="text" id="searchInput" placeholder="名前、IDなどで検索..." oninput="resetAndRender()">
+            </button>
         </div>
 
         <div id="stats-area">
@@ -521,7 +532,6 @@
     let isTrackingLocked = false;
     let quickChips = ["不在", "移転", "商談中", "完了"];
     
-    // ★機能追加: 選択された店舗IDを保持
     let highlightedId = null;
       
     let db = [];
@@ -673,6 +683,15 @@
             
             map.addListener('idle', () => { if(!isPinClick && mapSyncMode) resetAndRender(); isPinClick=false; });
             map.addListener('dragstart', () => { if(watchId) { isTrackingLocked=false; updateGpsBtnState(); } });
+            
+            // ★機能追加: マップ背景クリックで選択解除
+            map.addListener('click', () => {
+                if (highlightedId) {
+                    highlightedId = null; // 選択解除
+                    render(); // 色を戻すために再描画
+                }
+                if(infoWindow) infoWindow.close();
+            });
             
             document.getElementById('map-placeholder-msg').style.display='none';
             if(db.length > 0) render(); 
@@ -832,14 +851,13 @@
             const first = group[0];
             let isMe = group.some(c => targetReps.includes(c.rep_name));
             let isHit = group.some(c => hasSearch && normalize(c.name + c.r_code).includes(searchInput));
-            // ★機能追加: 選択中のピン判定
+            
             let isHighlighted = group.some(c => c.id === highlightedId);
             
             const pinView = document.createElement("div");
             pinView.style.width = (isHit || isHighlighted) ? "22px" : "16px";
             pinView.style.height = pinView.style.width;
             
-            // ★機能追加: ピンの色分けロジック (選択中 > 検索ヒット > 自分 > その他)
             let bgColor = "#bf5b5b";
             if(isHighlighted) bgColor = "#FFD60A";
             else if(isHit) bgColor = "#FFD60A";
@@ -999,9 +1017,8 @@
         btnArea.style.display = (targets.length > currentLimit && document.getElementById('limitSelect').value !== 'ALL') ? 'block' : 'none';
     }
 
-    // ★機能追加: IDを受け取り、強調表示変数をセットして再描画
     function panToMap(id, lat, lng) { 
-        highlightedId = id; // 強調IDセット
+        highlightedId = id; 
 
         map.setZoom(17); 
         map.panTo({lat, lng}); 
@@ -1011,7 +1028,6 @@
             toggle.checked = true;
             toggleMapSync(); 
         } else {
-            // 既に連動モードの場合は即座に再描画してピンの色を更新
             render();
         }
 
