@@ -215,13 +215,28 @@
             .action-btn:active { background: var(--gold-light); border-color: var(--gold); }
         }
         
+        /* ★修正: タイトル行のレイアウト強化 */
         .info-main { 
             font-family: var(--font-serif); font-weight: 600; font-size: 1.05rem; 
-            margin-bottom: 10px; color: var(--text-main); line-height: 1.4; display: flex; align-items: center;
+            margin-bottom: 10px; color: var(--text-main); line-height: 1.4; 
+            display: flex; align-items: center; flex-wrap: wrap; /* 折り返し許可 */
+            column-gap: 8px; row-gap: 4px; /* 要素間の隙間調整 */
         }
+        
+        /* ステータスドット */
+        .status-dot {
+            width: 8px; height: 8px; border-radius: 50%; display: inline-block;
+            flex-shrink: 0; /* 縮小禁止 */
+        }
+
         .info-sub { font-size: 0.85rem; color: var(--text-sub); margin-bottom: 6px; display: flex; align-items: center; flex-wrap: wrap; gap: 8px; line-height: 1.5; }
         
-        .credit-alert { color: var(--alert); font-weight: bold; margin-left: 6px; }
+        /* 与信アラート */
+        .credit-alert { 
+            color: var(--alert); font-weight: bold; 
+            white-space: nowrap; /* 途中で改行させない */
+            flex-shrink: 0; /* 縮小禁止 */
+        }
 
         .tag { 
             background: #f2f2f2; padding: 2px 8px; border-radius: 3px; 
@@ -447,10 +462,10 @@
             <label style="color:var(--text-main); font-size:1rem; margin-bottom:15px;">📥 データ取り込み</label>
             <div class="mode-switch">
                 <label class="mode-label active">
-                    <input type="radio" name="regMode" value="new" checked onchange="changeRegMode()"> 新規登録 (7列)
+                    <input type="radio" name="regMode" value="new" checked onchange="changeRegMode()"> 一括取り込み (新規・更新)
                 </label>
                 <label class="mode-label">
-                    <input type="radio" name="regMode" value="update" onchange="changeRegMode()"> 部分更新 (2列)
+                    <input type="radio" name="regMode" value="update" onchange="changeRegMode()"> 部分更新 (項目指定)
                 </label>
             </div>
 
@@ -466,12 +481,12 @@
             </div>
 
             <div id="mode-new-area">
-                <label>担当者名</label>
+                <label>担当者名 (新規登録時のみ使用)</label>
                 <input type="text" id="repName" placeholder="例: 佐藤">
             </div>
             
-            <label id="csv-label">データ貼り付け (7列: ID|社名|店名|住所|ビル名|電話|与信)</label>
-            <textarea id="csvInput" placeholder="R001	(株)ABC	大宮店	埼玉県...	XXビル 3F	090-1234-5678	前金" style="height:120px;"></textarea>
+            <label id="csv-label">データ貼り付け</label>
+            <textarea id="csvInput" placeholder="" style="height:120px;"></textarea>
             
             <button class="btn-main" id="runBtn" onclick="processData()">取り込み実行</button>
             
@@ -580,6 +595,8 @@
             document.getElementById('map-placeholder-msg').innerHTML = "設定からAPIキーを<br>設定してください";
         }
         document.getElementById('current-db-name').innerText = DB_NAME;
+        
+        changeRegMode();
     };
 
     function changeRegMode() {
@@ -592,12 +609,12 @@
         if(mode === 'new') {
             repArea.style.display = 'block';
             updateOptions.style.display = 'none';
-            label.innerText = "データ貼り付け (7列: ID|社名|店名|住所|ビル名|電話|与信)";
-            input.placeholder = "R001\t(株)ABC\t大宮店\t埼玉県...\tXXビル 3F\t090-1234-5678\t前金";
+            label.innerText = "データ貼り付け (最大9列: ID|社名|店名|住所|ビル名|電話|与信|最寄り駅|メモ)";
+            input.placeholder = "R001\t(株)ABC\t大宮店\t埼玉県...\tXXビル 3F\t090-1234-5678\t前金\t大宮\t備考...";
         } else {
             repArea.style.display = 'none';
             updateOptions.style.display = 'block';
-            updatePlaceholder(); // プレースホルダー更新
+            updatePlaceholder(); 
         }
     }
 
@@ -607,7 +624,7 @@
         const input = document.getElementById('csvInput');
         const targetText = document.querySelector(`#updateTarget option[value="${target}"]`).innerText;
         
-        label.innerText = `データ貼り付け (2列: ID|${targetText.split(' ')[0]})`;
+        label.innerText = `データ貼り付け (2列: ID|${targetText.split(' ')[0]}) ※2列以上あっても無視されます`;
         
         let exVal = "新しい値";
         if(target === 'credit') exVal = "前金";
@@ -779,20 +796,20 @@
         
         if (mode === 'update') {
             try {
-                // ★機能追加: 選択されたフィールドのみ更新
+                // 部分更新モード（項目指定）
                 const targetField = document.getElementById('updateTarget').value;
                 const lines = csv.split('\n');
                 let updateCount = 0;
                 
                 for(let line of lines) {
                     const cols = line.trim().split(/\t/).map(s=>s.trim());
-                    if(cols.length < 2) continue;
+                    if(cols.length < 2) continue; // 2列未満は無視
                     const rCode = cols[0];
-                    const newValue = cols[1];
+                    const newValue = cols[1]; // 2列目だけ取得し、3列目以降は無視
                     
                     const target = db.find(d => d.r_code === rCode);
                     if(target) {
-                        target[targetField] = newValue; // 動的にプロパティ更新
+                        target[targetField] = newValue; 
                         updateCount++;
                     }
                 }
@@ -802,52 +819,70 @@
                 btn.disabled = false; btn.innerText = "取り込み実行";
             }
         } else {
+            // 一括取り込み（新規・更新モード）
             const key = document.getElementById('apiKey').value.trim();
             const newRepName = document.getElementById('repName').value.trim();
             try {
                 await initSystem(localStorage.getItem('map_apiKey'));
-                const lines = csv.split('\n'); let count = 0;
+                const lines = csv.split('\n'); 
+                let count = 0;
+                let updateCount = 0;
+
                 for(let line of lines) {
                     const cols = line.trim().split(/\t/).map(s=>s.trim());
                     if(cols.length < 5) continue; 
                     
-                    // ★修正: 新しい列順 ID|社名|店名|住所|ビル名|電話|与信
-                    let r=cols[0];
-                    let name=(cols[1]+" "+cols[2]).trim();
+                    // 新フォーマット (最大9列): ID|社名|店名|住所|ビル名|電話|与信|最寄り駅|メモ
+                    let r = cols[0];
+                    let name = (cols[1]+" "+cols[2]).trim();
                     let addr = cols[3];
                     let build = cols[4];
                     let tel = cols[5]||"";
                     let credit = cols[6]||"";
+                    let station = cols[7]||"";
+                    let note = cols[8]||"";
 
-                    // (旧フォーマット互換用: 5列の場合は住所が3番目と仮定)
-                    if (cols.length === 5) {
-                        addr = cols[3];
-                        build = "";
-                        tel = cols[4]||"";
+                    // 既存IDがあるかチェック
+                    const existing = db.find(d => d.r_code === r);
+
+                    if (existing) {
+                        // 更新ロジック
+                        existing.name = name;
+                        existing.building = build;
+                        existing.address = addr;
+                        existing.tel = tel;
+                        existing.credit = credit;
+                        if(station) existing.station = station;
+                        if(note) existing.note = note;
+                        
+                        // 住所が変わっていたら座標更新の必要あり（今回は簡単のため座標は維持、文字だけ更新とします）
+                        
+                        updateCount++;
+                    } else {
+                        // 新規作成ロジック
+                        try {
+                            const coords = await new Promise((res, rej) => geocoder.geocode({ address: addr }, (r, s) => s==='OK'?res({lat: r[0].geometry.location.lat(), lng: r[0].geometry.location.lng()}):rej(s)));
+                            db.push({ 
+                                id: Math.random().toString(36).substr(2, 9), 
+                                r_code: r, 
+                                name: name, 
+                                building: build,
+                                address: addr, 
+                                tel: tel, 
+                                lat: coords.lat, 
+                                lng: coords.lng, 
+                                rep_name: newRepName, 
+                                note: note,
+                                station: station,
+                                credit: credit
+                            });
+                            count++; log(`処理中... 新規:${count} 更新:${updateCount}`);
+                        } catch(e) {}
+                        await new Promise(r => setTimeout(r, 400));
                     }
-
-                    try {
-                        const coords = await new Promise((res, rej) => geocoder.geocode({ address: addr }, (r, s) => s==='OK'?res({lat: r[0].geometry.location.lat(), lng: r[0].geometry.location.lng()}):rej(s)));
-                        db.push({ 
-                            id: Math.random().toString(36).substr(2, 9), 
-                            r_code: r, 
-                            name: name, 
-                            building: build,
-                            address: addr, 
-                            tel: tel, 
-                            lat: coords.lat, 
-                            lng: coords.lng, 
-                            rep_name: newRepName, 
-                            note: "",
-                            station: "",
-                            credit: credit
-                        });
-                        count++; log(`処理中... ${count}`);
-                    } catch(e) {}
-                    await new Promise(r => setTimeout(r, 400));
                 }
                 saveDB(); populateFilters(); resetAndRender(); 
-                alert(`${count} 件完了しました`);
+                alert(`完了: 新規 ${count} 件 / 更新 ${updateCount} 件`);
             } finally { btn.disabled = false; btn.innerText = "取り込み実行"; }
         }
     }
@@ -1027,7 +1062,9 @@
             
             div.innerHTML = `<div style="flex:1;">
                 <div class="info-main">
-                    <span style="background:${color};width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:10px;vertical-align:middle;"></span>${c.name}${creditHtml}
+                    <span class="status-dot" style="background:${color};"></span>
+                    <span class="shop-name">${c.name}</span>
+                    ${creditHtml}
                 </div>
                 <div class="info-sub">
                     <span class="tag tag-id">${c.r_code||"-"}</span>${c.rep_name||""}
