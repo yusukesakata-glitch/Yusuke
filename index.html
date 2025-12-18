@@ -129,8 +129,12 @@
         .btn-current-loc.locked { background: var(--gold); color: white; }
         .btn-current-loc.unlocked { color: var(--gold); border: 1px solid var(--gold); }
         
+        /* ★修正: PC/スマホ問わず左上に配置して、右上のGoogleマップ標準ボタンとの干渉を避ける */
         .map-sync-wrapper { 
-            position: absolute; top: 15px; right: 15px; z-index: 10; 
+            position: absolute; 
+            top: 15px; 
+            left: 15px; /* 右(right)から左(left)へ変更 */
+            z-index: 10; 
             background: rgba(255, 255, 255, 0.95); 
             padding: 4px 10px;
             border-radius: var(--radius); box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
@@ -139,9 +143,6 @@
             font-size: 0.75rem; 
             color: var(--text-main); 
             border: 1px solid rgba(0,0,0,0.05);
-        }
-        @media (max-width: 899px) {
-            .map-sync-wrapper { top: 15px; left: 15px; right: auto; }
         }
         
         /* トグルスイッチ */
@@ -215,27 +216,24 @@
             .action-btn:active { background: var(--gold-light); border-color: var(--gold); }
         }
         
-        /* ★修正: タイトル行のレイアウト強化 */
         .info-main { 
             font-family: var(--font-serif); font-weight: 600; font-size: 1.05rem; 
             margin-bottom: 10px; color: var(--text-main); line-height: 1.4; 
             display: flex; align-items: center; flex-wrap: wrap; /* 折り返し許可 */
-            column-gap: 8px; row-gap: 4px; /* 要素間の隙間調整 */
+            column-gap: 8px; row-gap: 4px; 
         }
         
-        /* ステータスドット */
         .status-dot {
             width: 8px; height: 8px; border-radius: 50%; display: inline-block;
-            flex-shrink: 0; /* 縮小禁止 */
+            flex-shrink: 0;
         }
 
         .info-sub { font-size: 0.85rem; color: var(--text-sub); margin-bottom: 6px; display: flex; align-items: center; flex-wrap: wrap; gap: 8px; line-height: 1.5; }
         
-        /* 与信アラート */
         .credit-alert { 
             color: var(--alert); font-weight: bold; 
-            white-space: nowrap; /* 途中で改行させない */
-            flex-shrink: 0; /* 縮小禁止 */
+            white-space: nowrap; 
+            flex-shrink: 0; 
         }
 
         .tag { 
@@ -609,8 +607,8 @@
         if(mode === 'new') {
             repArea.style.display = 'block';
             updateOptions.style.display = 'none';
-            label.innerText = "データ貼り付け (最大9列: ID|社名|店名|住所|ビル名|電話|与信|最寄り駅|メモ)";
-            input.placeholder = "R001\t(株)ABC\t大宮店\t埼玉県...\tXXビル 3F\t090-1234-5678\t前金\t大宮\t備考...";
+            label.innerText = "データ貼り付け (最大9列: ID|社名|店名|ビル名|住所|電話|与信|最寄り駅|メモ)";
+            input.placeholder = "R001\t(株)ABC\t大宮店\tXXビル 3F\t埼玉県...\t090-1234-5678\t前金\t大宮\t備考...";
         } else {
             repArea.style.display = 'none';
             updateOptions.style.display = 'block';
@@ -832,11 +830,11 @@
                     const cols = line.trim().split(/\t/).map(s=>s.trim());
                     if(cols.length < 5) continue; 
                     
-                    // 新フォーマット (最大9列): ID|社名|店名|住所|ビル名|電話|与信|最寄り駅|メモ
+                    // 新フォーマット (最大9列): ID|社名|店名|ビル名|住所|電話|与信|最寄り駅|メモ
                     let r = cols[0];
                     let name = (cols[1]+" "+cols[2]).trim();
-                    let addr = cols[3];
-                    let build = cols[4];
+                    let build = cols[3];
+                    let addr = cols[4];
                     let tel = cols[5]||"";
                     let credit = cols[6]||"";
                     let station = cols[7]||"";
